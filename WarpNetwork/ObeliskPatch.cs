@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewValley;
 using System.Collections.Generic;
 
 namespace WarpNetwork
@@ -62,7 +63,22 @@ namespace WarpNetwork
                         Point point = ObeliskTargets[Name];
                         if (Name == "Farm")
                         {
-                            point = Utils.GetActualFarmPoint(point.X, point.Y);
+                            if (ModEntry.IslandObeliskFixed || ev.OldLocation.Name != "IslandWest")
+                            {
+                                point = Utils.GetActualFarmPoint(point.X, point.Y);
+                            } else
+                            {
+                                //if the island obelisk isn't fixed, match the broken coords instead of the expected ones
+
+                                switch (Game1.whichFarm)
+                                {
+                                    //four corners
+                                    case 5: point = new Point(48, 39); break;
+
+                                    //beach
+                                    case 6: point = new Point(82, 29); break;
+                                }
+                            }
                         }
                         if (ev.Player.getTileLocationPoint() == point)
                         {
@@ -76,6 +92,13 @@ namespace WarpNetwork
                                     ev.Player.setTileLocation(new Vector2(dest.X, dest.Y));
                                     return;
                                 }
+                            } else if(Name == "Farm" && !ModEntry.IslandObeliskFixed && !ev.NewLocation.map.Properties.ContainsKey("WarpNetworkEntry"))
+                            {
+                                //will still fix the broken island obelisk IF it isn't already fixed, even if the farm destination is deleted and the farm has no warp network override.
+
+                                Point pos = ev.NewLocation.GetMapPropertyPosition("WarpTotemEntry", point.X, point.Y);
+                                ev.Player.setTileLocation(new Vector2(pos.X, pos.Y));
+                                return;
                             }
                             Point to = ev.NewLocation.GetMapPropertyPosition("WarpNetworkEntry", point.X, point.Y);
                             ev.Player.setTileLocation(new Vector2(to.X, to.Y));

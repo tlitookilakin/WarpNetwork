@@ -22,7 +22,7 @@ namespace WarpNetwork
         bool CanWarpTo(string ID);
         bool DestinationExists(string ID);
         bool DestinationIsCustomHandler(string ID);
-        void WarpTo(string ID);
+        bool WarpTo(string ID);
         void ShowWarpMenu(bool Force = false);
         void ShowWarpMenu(string Exclude);
         string[] GetDestinations();

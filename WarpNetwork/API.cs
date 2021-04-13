@@ -59,9 +59,9 @@ namespace WarpNetwork
         {
             WarpHandler.ShowWarpMenu(Exclude);
         }
-        public void WarpTo(string ID)
+        public bool WarpTo(string ID)
         {
-            WarpHandler.DirectWarp(ID, true);
+            return WarpHandler.DirectWarp(ID, true);
         }
         public void AddDestination(string ID, string Location, int X, int Y, bool DefaultEnabled, string Label, bool OverrideMapProperty)
         {

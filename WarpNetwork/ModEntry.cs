@@ -19,9 +19,11 @@ namespace WarpNetwork
         //main
         internal static Config Config;
         public static API api = new API();
+        public static bool IslandObeliskFixed = false;
         public override void Entry(IModHelper helper)
         {
             Config = helper.ReadConfig<Config>();
+            IslandObeliskFixed = helper.ModRegistry.IsLoaded("tlitookilakin.farmwarpspatch") || helper.ModRegistry.IsLoaded("FlashShifter.SVECode");
             CommandHandler.Init(Monitor, helper);
             WarpHandler.Init(Monitor, helper, Config);
             ItemHandler.Init(Monitor, helper, Config);

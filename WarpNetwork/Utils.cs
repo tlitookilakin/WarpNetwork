@@ -3,6 +3,7 @@ using StardewModdingAPI;
 using StardewValley;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using xTile;
 
 namespace WarpNetwork
@@ -162,6 +163,18 @@ namespace WarpNetwork
         {
             Dictionary<string, WarpLocation> dests = GetWarpLocations();
             return WarpHandler.CustomLocs.ContainsKey(name) ? WarpHandler.CustomLocs[name].GetEnabled(name) : dests.ContainsKey(name) && dests[name].Enabled;
+        }
+        public static string IterableToString(IEnumerable<object> iter)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("[");
+            foreach (object item in iter)
+            {
+                sb.Append(item.ToString());
+                sb.Append(", ");
+            }
+            sb.Append("]");
+            return sb.ToString();
         }
     }
 }
