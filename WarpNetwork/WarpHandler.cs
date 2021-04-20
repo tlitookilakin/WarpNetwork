@@ -248,7 +248,7 @@ namespace WarpNetwork
             {
                 return home.getFrontDoorSpot();
             }
-            return new Point(64, 15);
+            return Game1.getLocationFromName("Farm").GetMapPropertyPosition("FarmHouseEntry", 64, 15);
         }
         private static void DoWarpEffects(Action action)
         {
