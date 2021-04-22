@@ -36,6 +36,7 @@ namespace WarpNetwork
                 return;
             IGMCMAPI api = helper.ModRegistry.GetApi<IGMCMAPI>("spacechase0.GenericModConfigMenu");
             api.RegisterModConfig(manifest, ResetToDefault, () => helper.WriteConfig(this));
+            api.SetDefaultIngameOptinValue(manifest, true);
 
             api.RegisterLabel(manifest, manifest.Name, manifest.Description);
 
@@ -83,7 +84,6 @@ namespace WarpNetwork
                 () => MenuEnabled,
                 (bool b) => MenuEnabled = b
             );
-            api.SetDefaultIngameOptinValue(manifest, true);
         }
         internal string AsText()
         {
