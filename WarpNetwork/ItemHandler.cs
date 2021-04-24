@@ -60,8 +60,14 @@ namespace WarpNetwork
             if (items.ContainsKey(key))
             {
                 WarpItem item = items[key];
+                if(item.Destination.ToLower() == "_all")
+                {
+                    WarpHandler.ConsumeOnSelect = item.Consume;
+                    WarpHandler.ShowWarpMenu();
+                    return true;
+                }
                 Color color = Utils.ParseColor(item.Color);
-                DoTotemWarpEffects(color, id, who, (f) => WarpHandler.DirectWarp(item.Destination, item.IgnoreDisabled));
+                DoTotemWarpEffects(color, id, item.Consume, who, (f) => WarpHandler.DirectWarp(item.Destination, item.IgnoreDisabled));
                 return true;
             }
             return false;
@@ -83,7 +89,7 @@ namespace WarpNetwork
                     !who.onBridge
                     );
         }
-        private static void DoTotemWarpEffects(Color color, int id, Farmer who, Func<Farmer, bool> action)
+        private static void DoTotemWarpEffects(Color color, int id, bool Consume, Farmer who, Func<Farmer, bool> action)
         {
             who.jitterStrength = 1f;
             who.currentLocation.playSound("warrior", NetAudio.SoundContext.Default);
@@ -98,7 +104,9 @@ namespace WarpNetwork
                 new FarmerSprite.AnimationFrame( (short) who.FarmerSprite.CurrentFrame, 0, false, false, new AnimatedSprite.endOfAnimationBehavior((f) => {
                     if (action(f))
                     {
-                        who.reduceActiveItemByOne();
+                        if(Consume){
+                            who.reduceActiveItemByOne();
+                        }
                     } else
                     {
                         who.temporarilyInvincible = false;

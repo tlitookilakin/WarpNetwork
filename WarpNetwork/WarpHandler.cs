@@ -16,6 +16,7 @@ namespace WarpNetwork
         private static Config Config;
         private static GameLocation.afterQuestionBehavior QuestionResponder = new GameLocation.afterQuestionBehavior(answerQuestion);
         internal static bool FromWand = false;
+        internal static bool ConsumeOnSelect = false;
         internal static Point? DesertWarp = null;
         public static Dictionary<string, CustomLocationHandler> CustomLocs = new Dictionary<string, CustomLocationHandler>(StringComparer.OrdinalIgnoreCase);
         internal static void Init(IMonitor monitor, IModHelper helper, Config config)
@@ -92,11 +93,17 @@ namespace WarpNetwork
         {
             if(answer == "_" || !who.IsLocalPlayer)
             {
+                ConsumeOnSelect = false;
                 FromWand = false;
                 return;
             }
             if (CustomLocs.ContainsKey(answer))
             {
+                if (ConsumeOnSelect)
+                {
+                    who.reduceActiveItemByOne();
+                }
+                ConsumeOnSelect = false;
                 CustomLocs[answer].Warp(answer);
                 FromWand = false;
             }
@@ -106,6 +113,11 @@ namespace WarpNetwork
                 WarpLocation loc = locs[answer];
                 if (!(loc is null) && !(Game1.getLocationFromName(loc.Location) is null))
                 {
+                    if (ConsumeOnSelect)
+                    {
+                        who.reduceActiveItemByOne();
+                    }
+                    ConsumeOnSelect = false;
                     WarpToLocation(loc);
                 }
             }

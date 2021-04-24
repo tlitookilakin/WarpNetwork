@@ -10,6 +10,7 @@ namespace WarpNetwork
         public bool Enabled { set; get; } = false;
         public string Label { set; get; }
         public bool OverrideMapProperty { set; get; } = false;
+        public bool AlwaysHide { get; set; } = false;
 
         public Location CoordsAsLocation()
         {

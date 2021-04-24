@@ -86,13 +86,22 @@ namespace WarpNetwork
                 DataPatcher.ApiLocs[ID].Enabled = Enabled;
             }
         }
+        public void AddWarpItem(int ObjectID, string Destination, string Color)
+        {
+            AddWarpItem(ObjectID, Destination, Color, false);
+        }
         public void AddWarpItem(int ObjectID, string Destination, string Color, bool IgnoreDisabled)
+        {
+            AddWarpItem(ObjectID, Destination, Color, IgnoreDisabled, true);
+        }
+        public void AddWarpItem(int ObjectID, string Destination, string Color, bool IgnoreDisabled, bool Consume)
         {
             DataPatcher.ApiItems[ObjectID.ToString()] = new WarpItem
             {
                 Destination = Destination,
                 IgnoreDisabled = IgnoreDisabled,
-                Color = Color
+                Color = Color,
+                Consume = Consume
             };
         }
         public void RemoveWarpItem(int ObjectID)
@@ -150,6 +159,15 @@ namespace WarpNetwork
             if (DataPatcher.ApiItems.ContainsKey(ID))
             {
                 DataPatcher.ApiItems[ID].IgnoreDisabled = IgnoreDIsabled;
+            }
+        }
+
+        public void SetWarpItemConsume(int ObjectID, bool Consume)
+        {
+            string ID = ObjectID.ToString();
+            if (DataPatcher.ApiItems.ContainsKey(ID))
+            {
+                DataPatcher.ApiItems[ID].Consume = Consume;
             }
         }
     }

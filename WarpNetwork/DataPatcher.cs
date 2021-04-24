@@ -14,6 +14,8 @@ namespace WarpNetwork
 {
     class DataPatcher : IAssetEditor
     {
+        private static readonly string[] DefaultDests = { "farm", "mountain", "beach", "desert", "island"};
+
         private static IMonitor Monitor;
         private static IModHelper Helper;
         private static Config Config;
@@ -71,6 +73,20 @@ namespace WarpNetwork
             foreach(string key in ApiItems.Keys)
             {
                 dict[key] = ApiItems[key];
+            }
+        }
+        internal static void TranslateDefaultWarps(IDictionary<string, WarpLocation> dict)
+        {
+            foreach(string key in DefaultDests)
+            {
+                if (dict.ContainsKey(key))
+                {
+                    Translation label = Helper.Translation.Get("dest-" + key);
+                    if (label.HasValue())
+                    {
+                        dict[key].Label = label;
+                    }
+                }
             }
         }
         internal static void EditLocationsEnabled(IDictionary<string, WarpLocation> dict)

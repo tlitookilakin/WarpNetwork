@@ -67,6 +67,7 @@ namespace WarpNetwork
                 Dictionary<string, WarpLocation> locs = Helper.Content.Load<Dictionary<string, WarpLocation>>(Path.Combine("assets", "Destinations.json"));
                 DataPatcher.EditLocationsEnabled(locs);
                 DataPatcher.AddApiLocs(locs);
+                DataPatcher.TranslateDefaultWarps(locs);
                 return (T)(object)locs;
             }
             return default;
