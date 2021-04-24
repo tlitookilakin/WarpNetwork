@@ -53,6 +53,7 @@ namespace WarpNetwork
                 WarpLocation loc = locs[id];
                 string normid = id.ToLower();
                 if (
+                    !loc.AlwaysHide &&
                     !CustomLocs.ContainsKey(id) && (
                     normalized == "_force" || 
                     (loc.Enabled && normid != normalized) || 

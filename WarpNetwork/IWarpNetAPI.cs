@@ -4,13 +4,15 @@ namespace WarpNetwork
 {
     public interface IWarpNetAPI
     {
-        void AddDestination(string ID, string Location, int X, int Y, bool DefaultEnabled, string Label, bool OverrideMapProperty);
+        void AddDestination(string ID, string Location, int X, int Y, bool DefaultEnabled, string Label);
+        void AddDestination(string ID, string Location, int X, int Y, bool DefaultEnabled, string Label, bool OverrideMapProperty, bool AlwaysHide);
         void RemoveDestination(string ID);
         void SetDestinationEnabled(string ID, bool Enabled);
         void SetDestinationLocation(string ID, string Location);
         void SetDestinationPosition(string ID, int X, int Y);
         void SetDestinationLabel(string ID, string Label);
         void SetDestinationOverrideMap(string ID, bool OverrideMapProperty);
+        void SetDestinationAlwaysHidden(string ID, bool AlwaysHide);
         void AddWarpItem(int ObjectID, string Destination, string Color);
         void AddWarpItem(int ObjectID, string Destination, string Color, bool IgnoreDisabled);
         void AddWarpItem(int ObjectID, string Destination, string Color, bool IgnoreDisabled, bool Consume);

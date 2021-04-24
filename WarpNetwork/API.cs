@@ -63,7 +63,11 @@ namespace WarpNetwork
         {
             return WarpHandler.DirectWarp(ID, true);
         }
-        public void AddDestination(string ID, string Location, int X, int Y, bool DefaultEnabled, string Label, bool OverrideMapProperty)
+        public void AddDestination(string ID, string Location, int X, int Y, bool DefaultEnabled, string Label)
+        {
+            AddDestination(ID, Location, X, Y, DefaultEnabled, Label, false, false);
+        }
+        public void AddDestination(string ID, string Location, int X, int Y, bool DefaultEnabled, string Label, bool OverrideMapProperty, bool AlwaysHide)
         {
             DataPatcher.ApiLocs[ID] = new WarpLocation
             {
@@ -72,7 +76,8 @@ namespace WarpNetwork
                 X = X,
                 Y = Y,
                 OverrideMapProperty = OverrideMapProperty,
-                Location = Location
+                Location = Location,
+                AlwaysHide = AlwaysHide
             };
         }
         public void RemoveDestination(string ID)
@@ -135,6 +140,13 @@ namespace WarpNetwork
             if (DataPatcher.ApiLocs.ContainsKey(ID))
             {
                 DataPatcher.ApiLocs[ID].OverrideMapProperty = OverrideMapProperty;
+            }
+        }
+        public void SetDestinationAlwaysHidden(string ID, bool AlwaysHide)
+        {
+            if (DataPatcher.ApiLocs.ContainsKey(ID))
+            {
+                DataPatcher.ApiLocs[ID].AlwaysHide = AlwaysHide;
             }
         }
         public void SetWarpItemDestination(int ObjectID, string Destination)
