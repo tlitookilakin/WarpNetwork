@@ -47,7 +47,8 @@ namespace WarpNetwork
                     asset.AssetNameEquals("Maps/Farm_Foraging") ||
                     asset.AssetNameEquals("Maps/Farm_FourCorners") ||
                     asset.AssetNameEquals("Maps/Farm_Island") ||
-                    asset.AssetNameEquals("Maps/Farm_Mining")
+                    asset.AssetNameEquals("Maps/Farm_Mining") || 
+                    asset.AssetName.StartsWith("Maps/Farm_")
                 );
         }
         public void Edit<T>(IAssetData asset)

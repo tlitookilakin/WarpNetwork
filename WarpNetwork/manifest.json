@@ -13,7 +13,7 @@
     },
     {
       "UniqueID": "pathoschild.ContentPatcher",
-      "Required":  "false"
+      "IsRequired":  "false"
     }
   ]
 }

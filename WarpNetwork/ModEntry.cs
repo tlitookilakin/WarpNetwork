@@ -13,8 +13,8 @@ namespace WarpNetwork
     class ModEntry : Mod, IAssetLoader
     {
         //const
-        public static readonly string pathLocData = Path.Combine("Data","WarpNetwork","Destinations");
-        public static readonly string pathItemData = Path.Combine("Data","WarpNetwork","WarpItems");
+        public static readonly string pathLocData = "Data/WarpNetwork/Destinations";
+        public static readonly string pathItemData = "Data/WarpNetwork/WarpItems";
 
         //main
         internal static Config Config;
