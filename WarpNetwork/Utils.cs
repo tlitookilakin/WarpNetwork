@@ -51,6 +51,7 @@ namespace WarpNetwork
             }
             return GetMapPropertyPosition(map, "WarpTotemEntry", x, y);
         }
+        public static string CurrentFarmFilenameGuess
         public static int GetFarmType(string filename)
         {
             if(filename is null)

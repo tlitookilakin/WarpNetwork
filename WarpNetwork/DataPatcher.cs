@@ -48,7 +48,7 @@ namespace WarpNetwork
                     asset.AssetNameEquals("Maps/Farm_FourCorners") ||
                     asset.AssetNameEquals("Maps/Farm_Island") ||
                     asset.AssetNameEquals("Maps/Farm_Mining") || 
-                    asset.AssetName.StartsWith("Maps/Farm_")
+                    (Game1.whichFarm == 7 && asset.AssetNameEquals("Maps/"+Game1.whichModFarm.MapName) && asset.DataType == typeof(Map))
                 );
         }
         public void Edit<T>(IAssetData asset)
