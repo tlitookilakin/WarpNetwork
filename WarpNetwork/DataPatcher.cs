@@ -22,7 +22,6 @@ namespace WarpNetwork
 
         public static Dictionary<string, WarpLocation> ApiLocs = new Dictionary<string, WarpLocation>(StringComparer.OrdinalIgnoreCase);
         public static Dictionary<string, WarpItem> ApiItems = new Dictionary<string, WarpItem>(StringComparer.OrdinalIgnoreCase);
-        private static string FarmMapName = "";
 
         internal static void Init(IMonitor monitor, IModHelper helper, Config config)
         {
@@ -52,7 +51,7 @@ namespace WarpNetwork
                 if (Config.MenuEnabled)
                 {
                     string Name = Path.GetFileNameWithoutExtension(asset.AssetName);
-                    Name = (Name == "Island_S") ? "island" : (Name.Contains("Beach")) ? "beach" : Name.ToLower();
+                    Name = (Name == "Island_S") ? "island" : Name.StartsWith("Maps/Beach") ? "beach" : Name.ToLower();
                     AddVanillaWarpStatue(asset.AsMap(), Name);
                 }
             }
@@ -150,7 +149,7 @@ namespace WarpNetwork
         }
         private static void AddVanillaWarpStatue(IAssetDataForMap map, string Name)
         {
-            string id = (Name == Path.GetFileName(Utils.GetFarmMapPath())) ? "farm" : Name;
+            string id = (Name == Path.GetFileName(Utils.GetFarmMapPath()).ToLower()) ? "farm" : Name;
             if (!map.Data.Properties.ContainsKey("WarpNetworkEntry"))
             {
                 Dictionary<String, WarpLocation> locs = Utils.GetWarpLocations();
