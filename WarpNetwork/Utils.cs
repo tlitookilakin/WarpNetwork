@@ -12,6 +12,10 @@ namespace WarpNetwork
     {
         private static IModHelper Helper;
         private static IMonitor Monitor;
+        private static readonly string[] VanillaMapNames =
+        {
+            "Farm","Farm_Fishing","Farm_Foraging","Farm_Mining","Farm_Combat","Farm_FourCorners","Farm_Island"
+        };
         private static readonly Dictionary<string, int> FarmTypeMap = new Dictionary<string, int>()
         {
             {"farm", 0},
@@ -50,6 +54,27 @@ namespace WarpNetwork
                     break;
             }
             return GetMapPropertyPosition(map, "WarpTotemEntry", x, y);
+        }
+        public static string GetFarmMapPath()
+        {
+            if(Game1.whichFarm < 0)
+            {
+                Monitor.Log("Something is wrong! Game1.whichfarm does not contain a valid value!", LogLevel.Warn);
+                return "";
+
+            } else if (Game1.whichFarm < 7)
+            {
+                return VanillaMapNames[Game1.whichFarm];
+
+            } else if (Game1.whichModFarm == null)
+            {
+                Monitor.Log("Something is wrong! Custom farm indicated, but Game1.whichModFarm is null!", LogLevel.Warn);
+                return "";
+            }
+            else
+            {
+                return Game1.whichModFarm.MapName;
+            }
         }
         public static int GetFarmType(string filename)
         {

@@ -22,6 +22,7 @@ namespace WarpNetwork
 
         public static Dictionary<string, WarpLocation> ApiLocs = new Dictionary<string, WarpLocation>(StringComparer.OrdinalIgnoreCase);
         public static Dictionary<string, WarpItem> ApiItems = new Dictionary<string, WarpItem>(StringComparer.OrdinalIgnoreCase);
+        private static string FarmMapName = "";
 
         internal static void Init(IMonitor monitor, IModHelper helper, Config config)
         {
@@ -31,7 +32,7 @@ namespace WarpNetwork
         }
         public bool CanEdit<T>(IAssetInfo asset)
         {
-            return (
+            return 
                     asset.AssetNameEquals(ModEntry.pathLocData) ||
                     asset.AssetNameEquals(ModEntry.pathItemData) ||
                     asset.AssetNameEquals("Maps/Beach") ||
@@ -41,15 +42,8 @@ namespace WarpNetwork
                     asset.AssetNameEquals("Maps/Island_S") ||
                     asset.AssetNameEquals("Maps/Mountain") ||
                     asset.AssetNameEquals("Maps/Desert") ||
-                    asset.AssetNameEquals("Maps/Farm") ||
-                    asset.AssetNameEquals("Maps/Farm_Fishing") ||
-                    asset.AssetNameEquals("Maps/Farm_Combat") ||
-                    asset.AssetNameEquals("Maps/Farm_Foraging") ||
-                    asset.AssetNameEquals("Maps/Farm_FourCorners") ||
-                    asset.AssetNameEquals("Maps/Farm_Island") ||
-                    asset.AssetNameEquals("Maps/Farm_Mining") || 
-                    (Game1.whichFarm == 7 && asset.AssetNameEquals("Maps/"+Game1.whichModFarm.MapName) && asset.DataType == typeof(Map))
-                );
+                    asset.AssetNameEquals("Maps/"+Utils.GetFarmMapPath())
+                ;
         }
         public void Edit<T>(IAssetData asset)
         {
@@ -156,7 +150,7 @@ namespace WarpNetwork
         }
         private static void AddVanillaWarpStatue(IAssetDataForMap map, string Name)
         {
-            string id = Name.Contains("farm") ? "farm" : Name;
+            string id = (Name == Path.GetFileName(Utils.GetFarmMapPath())) ? "farm" : Name;
             if (!map.Data.Properties.ContainsKey("WarpNetworkEntry"))
             {
                 Dictionary<String, WarpLocation> locs = Utils.GetWarpLocations();
