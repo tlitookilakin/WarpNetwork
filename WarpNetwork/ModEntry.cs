@@ -37,6 +37,9 @@ namespace WarpNetwork
             helper.Events.Input.ButtonPressed += ItemHandler.ButtonPressed;
             helper.Events.Player.Warped += ObeliskPatch.MoveAfterWarp;
             SpaceEvents.ActionActivated += WarpHandler.HandleAction;
+            //helper.Events.GameLoop.SaveLoaded += (object sender, SaveLoadedEventArgs ev) => {
+                //helper.Content.InvalidateCache("Maps/" + Utils.GetFarmMapPath());
+            //};
         }
         public void GameLaunched(object sender, GameLaunchedEventArgs ev)
         {
