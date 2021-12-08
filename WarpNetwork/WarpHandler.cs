@@ -85,7 +85,7 @@ namespace WarpNetwork
             }
 
             FromWand = normalized == "_wand";
-            Game1.activeClickableMenu = new WarpMenu(dests, 10, 10, 20, 20, null);
+            Game1.activeClickableMenu = new WarpMenu(dests, 30, 30, 800, 200);
             //Game1.drawObjectQuestionDialogue(Game1.parseText(Helper.Translation.Get("warpnet-label")), dests);
         }
         private static void answerQuestion(Farmer who, String answer)

@@ -31,6 +31,7 @@ namespace WarpNetwork
             ObeliskPatch.Init(Monitor, Config);
             DataPatcher.Init(Monitor, helper, Config);
             CPIntegration.Init(Monitor, helper, Config);
+            WarpMenu.Init(helper, Monitor);
             helper.ConsoleCommands.Add("warpnet", "Master command for Warp Network mod. Use 'warpnet' or 'warpnet help' to see a list of subcommands.", CommandHandler.Main);
             helper.Content.AssetEditors.Add(new DataPatcher());
             helper.Events.GameLoop.GameLaunched += GameLaunched;
