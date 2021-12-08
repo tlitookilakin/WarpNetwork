@@ -187,7 +187,7 @@ namespace WarpNetwork
         public static bool IsLocationEnabled(string name)
         {
             Dictionary<string, WarpLocation> dests = GetWarpLocations();
-            return WarpHandler.CustomLocs.ContainsKey(name) ? WarpHandler.CustomLocs[name].GetEnabled(name) : dests.ContainsKey(name) && dests[name].Enabled;
+            return WarpHandler.CustomLocs.ContainsKey(name) ? WarpHandler.CustomLocs[name].GetEnabled() : dests.ContainsKey(name) && dests[name].Enabled;
         }
         public static string IterableToString(IEnumerable<object> iter)
         {
