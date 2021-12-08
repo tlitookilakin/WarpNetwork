@@ -121,11 +121,11 @@ namespace WarpNetwork
             }
             foreach(string key in WarpHandler.CustomLocs.Keys)
             {
-                CustomLocationHandler handler = WarpHandler.CustomLocs[key];
+                IWarpNetHandler handler = WarpHandler.CustomLocs[key];
                 builder.AppendLine();
                 builder.Append(key).AppendLine(":");
                 builder.Append("\t<Custom Handler>");
-                builder.Append(", Enabled: ").AppendLine(handler.GetEnabled(key).ToString());
+                builder.Append(", Enabled: ").AppendLine(handler.GetEnabled().ToString());
             }
             print(builder.ToString());
         }

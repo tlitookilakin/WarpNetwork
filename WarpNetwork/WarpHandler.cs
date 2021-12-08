@@ -103,7 +103,6 @@ namespace WarpNetwork
                     who.reduceActiveItemByOne();
                 }
                 ConsumeOnSelect = false;
-                CustomLocs[answer].Warp(answer);
                 FromWand = false;
             }
             else
@@ -163,10 +162,10 @@ namespace WarpNetwork
             }
             if (CustomLocs.ContainsKey(location))
             {
-                CustomLocationHandler cloc = CustomLocs[location];
-                if(force || cloc.GetEnabled(location))
+                IWarpNetHandler cloc = CustomLocs[location];
+                if(force || cloc.GetEnabled())
                 {
-                    cloc.Warp(location);
+                    cloc.Warp();
                     return true;
                 } else
                 {
