@@ -14,11 +14,11 @@ namespace WarpNetwork
         private static IMonitor Monitor;
         private static IModHelper Helper;
         private static Config Config;
-        private static GameLocation.afterQuestionBehavior QuestionResponder = new GameLocation.afterQuestionBehavior(answerQuestion);
+        private static readonly GameLocation.afterQuestionBehavior QuestionResponder = new(answerQuestion);
         internal static bool FromWand = false;
         internal static bool ConsumeOnSelect = false;
         internal static Point? DesertWarp = null;
-        public static Dictionary<string, CustomLocationHandler> CustomLocs = new Dictionary<string, CustomLocationHandler>(StringComparer.OrdinalIgnoreCase);
+        public static Dictionary<string, IWarpNetHandler> CustomLocs = new(StringComparer.OrdinalIgnoreCase);
         internal static void Init(IMonitor monitor, IModHelper helper, Config config)
         {
             Monitor = monitor;
@@ -34,9 +34,8 @@ namespace WarpNetwork
                 return;
             }
 
-            //Game1.activeClickableMenu = new WarpSelectMenu();
-            List<Response> dests = new List<Response>();
-            Dictionary<String, WarpLocation> locs = Utils.GetWarpLocations();
+            List<WarpLocation> dests = new();
+            Dictionary<string, WarpLocation> locs = Utils.GetWarpLocations();
 
             if (locs.ContainsKey(exclude))
             {
@@ -63,7 +62,7 @@ namespace WarpNetwork
                 {
                     if(Game1.getLocationFromName(loc.Location) != null)
                     {
-                        dests.Add(new Response(id, loc.Label));
+                        dests.Add(locs[id]);
                     } else
                     {
                         Monitor.Log("Invalid Location name '"+loc.Location+"'; skipping entry.", LogLevel.Warn);
@@ -72,10 +71,10 @@ namespace WarpNetwork
             }
             foreach (string id in CustomLocs.Keys)
             {
-                CustomLocationHandler handler = CustomLocs[id];
-                if(normalized == "_force" || (handler.GetEnabled(id) && id.ToLowerInvariant() != normalized))
+                IWarpNetHandler handler = CustomLocs[id];
+                if(normalized == "_force" || (handler.GetEnabled() && id.ToLowerInvariant() != normalized))
                 {
-                    dests.Add(new Response(id, handler.GetLabel(id)));
+                    dests.Add(new CustomWarpLocation(handler));
                 }
             }
             if(dests.Count == 0)
@@ -84,10 +83,9 @@ namespace WarpNetwork
                 ShowFailureText();
                 return;
             }
-            dests.Add(new Response("_", Game1.parseText(Helper.Translation.Get("ui-cancel"))));
 
             FromWand = normalized == "_wand";
-            Game1.currentLocation.createQuestionDialogue(Game1.parseText(Helper.Translation.Get("ui-label")), dests.ToArray(), QuestionResponder);
+            Game1.activeClickableMenu = new WarpMenu(dests, 10, 10, 20, 20, null);
             //Game1.drawObjectQuestionDialogue(Game1.parseText(Helper.Translation.Get("warpnet-label")), dests);
         }
         private static void answerQuestion(Farmer who, String answer)
