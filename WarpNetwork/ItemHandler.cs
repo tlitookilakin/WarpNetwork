@@ -121,7 +121,8 @@ namespace WarpNetwork
             // reflection
             Multiplayer mp = ModEntry.helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
             // --
-            mp.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(0.0f, -96f), false, false, false, 0.0f)
+            mp.broadcastSprites(who.currentLocation, 
+            new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(0.0f, -96f), false, false, false, 0.0f)
             {
                 motion = new Vector2(0.0f, -1f),
                 scaleChange = 0.01f,
@@ -133,8 +134,8 @@ namespace WarpNetwork
                 xPeriodicLoopTime = 1000f,
                 xPeriodicRange = 4f,
                 layerDepth = 1f
-            });
-            mp.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(-64f, -96f), false, false, false, 0.0f)
+            },
+            new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(-64f, -96f), false, false, false, 0.0f)
             {
                 motion = new Vector2(0.0f, -0.5f),
                 scaleChange = 0.005f,
@@ -148,8 +149,8 @@ namespace WarpNetwork
                 xPeriodicLoopTime = 1000f,
                 xPeriodicRange = 4f,
                 layerDepth = 0.9999f
-            });
-            mp.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(64f, -96f), false, false, false, 0.0f)
+            },
+            new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(64f, -96f), false, false, false, 0.0f)
             {
                 motion = new Vector2(0.0f, -0.5f),
                 scaleChange = 0.005f,
