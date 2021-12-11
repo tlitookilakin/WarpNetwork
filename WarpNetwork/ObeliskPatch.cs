@@ -8,8 +8,6 @@ namespace WarpNetwork
 {
     class ObeliskPatch
     {
-        private static IMonitor Monitor;
-        private static Config Config;
         private static readonly Dictionary<string, Point> ObeliskTargets = new Dictionary<string, Point>()
         {
             {"Farm", new Point(48, 7)},
@@ -18,11 +16,6 @@ namespace WarpNetwork
             {"Beach",new Point(20, 4)},
             {"Desert",new Point(35, 43)}
         };
-        internal static void Init(IMonitor monitor, Config config)
-        {
-            Monitor = monitor;
-            Config = config;
-        }
         public static void MoveAfterWarp(object sender, WarpedEventArgs ev)
         {
             if (ev.IsLocalPlayer)
@@ -38,7 +31,7 @@ namespace WarpNetwork
                         Point to = (Point)WarpHandler.DesertWarp;
                         WarpHandler.DesertWarp = null;
                         ev.Player.setTileLocation(new Vector2(to.X, to.Y));
-                    } else if (Config.PatchObelisks && point == ev.Player.getTileLocationPoint())
+                    } else if (ModEntry.config.PatchObelisks && point == ev.Player.getTileLocationPoint())
                     {
                         Dictionary<string, WarpLocation> dests = Utils.GetWarpLocations();
                         if (dests.ContainsKey("desert"))
@@ -56,7 +49,7 @@ namespace WarpNetwork
                         ev.Player.setTileLocation(new Vector2(to.X, to.Y));
                     }
                 }
-                else if (Config.PatchObelisks)
+                else if (ModEntry.config.PatchObelisks)
                 {
                     if (ObeliskTargets.ContainsKey(Name))
                     {

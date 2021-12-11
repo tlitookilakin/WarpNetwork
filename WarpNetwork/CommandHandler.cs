@@ -11,8 +11,6 @@ namespace WarpNetwork
 {
     class CommandHandler
     {
-        private static IMonitor Monitor;
-        private static IModHelper Helper;
 
         private static readonly Dictionary<string, string> CmdDescs = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase)
         {
@@ -47,11 +45,6 @@ namespace WarpNetwork
             {"menu", WarpMenu},
             {"debug", PrintDebug}
         };
-        internal static void Init(IMonitor monitor, IModHelper helper)
-        {
-            Helper = helper;
-            Monitor = monitor;
-        }
         public static void Main(string cmd, string[] args)
         {
             if(args.Length == 0)
@@ -69,7 +62,7 @@ namespace WarpNetwork
         }
         private static void print(object what)
         {
-            Monitor.Log(what.ToString(), LogLevel.Debug);
+            ModEntry.monitor.Log(what.ToString(), LogLevel.Debug);
         }
         private static void ShowHelp(string[] args)
         {
@@ -204,7 +197,7 @@ namespace WarpNetwork
             GetLocations(args);
             GetItems(args);
             GetHeldID(args);
-            print(ModEntry.Config.AsText());
+            print(ModEntry.config.AsText());
             StringBuilder sb = new StringBuilder(17);
             sb.AppendLine();
             sb.Append("Location: ").AppendLine(Game1.player.currentLocation.Name);

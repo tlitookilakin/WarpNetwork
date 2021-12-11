@@ -13,15 +13,6 @@ namespace WarpNetwork
 {
     class ItemHandler
     {
-        private static IModHelper Helper;
-        private static IMonitor Monitor;
-        private static Config Config;
-        internal static void Init(IMonitor monitor, IModHelper helper, Config config)
-        {
-            Monitor = monitor;
-            Helper = helper;
-            Config = config;
-        }
         public static void ButtonPressed(object sender, ButtonPressedEventArgs action){
             if (action.IsSuppressed())
             {
@@ -41,16 +32,16 @@ namespace WarpNetwork
                         int id = who.ActiveObject.ParentSheetIndex;
                         if(UseItem(who, id))
                         {
-                            Helper.Input.Suppress(action.Button);
+                            ModEntry.helper.Input.Suppress(action.Button);
                         }
                     }
                 }
-            } else if (action.Button.IsUseToolButton() && who.CurrentTool is Wand && Config.AccessFromWand && Config.MenuEnabled)
+            } else if (action.Button.IsUseToolButton() && who.CurrentTool is Wand && ModEntry.config.AccessFromWand && ModEntry.config.MenuEnabled)
             {
                 if(CanUseHere(who) && who.CanMove)
                 {
                     WarpHandler.ShowWarpMenu("_wand");
-                    Helper.Input.Suppress(action.Button);
+                    ModEntry.helper.Input.Suppress(action.Button);
                 }
             }
         }
@@ -116,7 +107,7 @@ namespace WarpNetwork
                 }), true)
             }, null);
             // reflection
-            Multiplayer mp = Helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
+            Multiplayer mp = ModEntry.helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
             // --
             mp.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite(id, 9999f, 1, 999, who.Position + new Vector2(0.0f, -96f), false, false, false, 0.0f)
             {

@@ -14,8 +14,6 @@ namespace WarpNetwork
 {
     class Utils
     {
-        private static IModHelper Helper;
-        private static IMonitor Monitor;
         private static readonly string[] VanillaMapNames =
         {
             "Farm","Farm_Fishing","Farm_Foraging","Farm_Mining","Farm_Combat","Farm_FourCorners","Farm_Island"
@@ -30,12 +28,6 @@ namespace WarpNetwork
             {"farm_fourcorners", 5},
             {"farm_island", 6}
         };
-
-        internal static void Init(IModHelper helper, IMonitor monitor)
-        {
-            Helper = helper;
-            Monitor = monitor;
-        }
         public static Point GetActualFarmPoint(int default_x, int default_y)
         {
             return GetActualFarmPoint(Game1.getFarm().Map, default_x, default_y);
@@ -63,7 +55,7 @@ namespace WarpNetwork
         {
             if(Game1.whichFarm < 0)
             {
-                Monitor.Log("Something is wrong! Game1.whichfarm does not contain a valid value!", LogLevel.Warn);
+                ModEntry.monitor.Log("Something is wrong! Game1.whichfarm does not contain a valid value!", LogLevel.Warn);
                 return "";
 
             } else if (Game1.whichFarm < 7)
@@ -72,7 +64,7 @@ namespace WarpNetwork
 
             } else if (Game1.whichModFarm == null)
             {
-                Monitor.Log("Something is wrong! Custom farm indicated, but Game1.whichModFarm is null!", LogLevel.Warn);
+                ModEntry.monitor.Log("Something is wrong! Custom farm indicated, but Game1.whichModFarm is null!", LogLevel.Warn);
                 return "";
             }
             else
@@ -108,12 +100,12 @@ namespace WarpNetwork
         }
         public static Dictionary<string, WarpLocation> GetWarpLocations()
         {
-            Dictionary<string, WarpLocation> data = Helper.Content.Load<Dictionary<string, WarpLocation>>(ModEntry.pathLocData, ContentSource.GameContent);
+            Dictionary<string, WarpLocation> data = ModEntry.helper.Content.Load<Dictionary<string, WarpLocation>>(ModEntry.pathLocData, ContentSource.GameContent);
             return new Dictionary<string, WarpLocation>(data, StringComparer.OrdinalIgnoreCase);
         }
         public static Dictionary<string, WarpItem> GetWarpItems()
         {
-            return Helper.Content.Load<Dictionary<string, WarpItem>>(ModEntry.pathItemData, ContentSource.GameContent);
+            return ModEntry.helper.Content.Load<Dictionary<string, WarpItem>>(ModEntry.pathItemData, ContentSource.GameContent);
         }
         public static T ParseEnum<T>(string str)
         {
@@ -138,14 +130,14 @@ namespace WarpNetwork
         {
             if(str.Length == 0)
             {
-                Monitor.Log("Could not parse color from string: '" + str + "'.", LogLevel.Warn);
+                ModEntry.monitor.Log("Could not parse color from string: '" + str + "'.", LogLevel.Warn);
                 return Color.Transparent;
             }
             if(str[0] == '#')
             {
                 if(str.Length <= 6)
                 {
-                    Monitor.Log("Could not parse color from string: '" + str + "'.", LogLevel.Warn);
+                    ModEntry.monitor.Log("Could not parse color from string: '" + str + "'.", LogLevel.Warn);
                     return Color.Transparent;
                 }
                 int r = Convert.ToInt32(str.Substring(1, 2), 16);
@@ -168,7 +160,7 @@ namespace WarpNetwork
                     }
                     return new Color(Int32.Parse(vals[0]), Int32.Parse(vals[1]), Int32.Parse(vals[2]));
                 }
-                Monitor.Log("Could not parse color from string: '" + str + "'.", LogLevel.Warn);
+                ModEntry.monitor.Log("Could not parse color from string: '" + str + "'.", LogLevel.Warn);
                 return Color.Transparent;
             }
         }
@@ -182,7 +174,7 @@ namespace WarpNetwork
             {
                 return false;
             }
-            return Convert.ToInt32(Helper.Content.Load<Dictionary<string, string>>("Data/Festivals/" + Game1.currentSeason + Game1.dayOfMonth, ContentSource.GameContent)["conditions"].Split('/')[1].Split(' ')[0]) <= Game1.timeOfDay;
+            return Convert.ToInt32(ModEntry.helper.Content.Load<Dictionary<string, string>>("Data/Festivals/" + Game1.currentSeason + Game1.dayOfMonth, ContentSource.GameContent)["conditions"].Split('/')[1].Split(' ')[0]) <= Game1.timeOfDay;
         }
         public static bool LocationExists(string name)
         {
@@ -222,11 +214,11 @@ namespace WarpNetwork
                     );
             } catch(InvalidCastException e)
             {
-                Monitor.Log("Could not wrap object of type '" + type.FullName + "': " + e.Message, LogLevel.Error);
+                ModEntry.monitor.Log("Could not wrap object of type '" + type.FullName + "': " + e.Message, LogLevel.Error);
                 return null;
             }
         }
-        public static T getMethodOf<T>(Type type, string name)
+        internal static T getMethodOf<T>(Type type, string name)
         {
             MethodInfo method = type.GetMethod(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static);
             if(method == null)

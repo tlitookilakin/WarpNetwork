@@ -4,11 +4,11 @@ namespace WarpNetwork.api
 {
     class WarpNetHandler : IWarpNetHandler
     {
-        private readonly Func<bool> getEnabled;
-        private readonly Func<string> getIconName;
-        private readonly Func<string> getLabel;
-        private readonly Action warp;
-        internal WarpNetHandler(Func<bool> enabled, Func<string> icon, Func<string> label, Action warp)
+        public Func<bool> getEnabled;
+        public Func<string> getIconName;
+        public Func<string> getLabel;
+        public Action warp;
+        internal WarpNetHandler(Func<bool> enabled = null, Func<string> icon = null, Func<string> label = null, Action warp = null)
         {
             getEnabled = enabled;
             getIconName = icon;
