@@ -9,32 +9,28 @@ namespace WarpNetwork.api
     {
         public bool AddCustomDestinationHandler(string ID, object handler)
         {
-            if (WarpHandler.CustomLocs.ContainsKey(ID))
+            if (Utils.CustomLocs.ContainsKey(ID))
             {
-                WarpHandler.CustomLocs.Remove(ID);
+                Utils.CustomLocs.Remove(ID);
             }
             IWarpNetHandler h = Utils.WrapHandlerObject(handler);
             if (h != null)
             {
-                WarpHandler.CustomLocs.Add(ID, h);
+                Utils.CustomLocs.Add(ID, h);
                 return true;
             }
             return false;
         }
         public void AddCustomDestinationHandler(string ID, Func<bool> getEnabled, Func<string> getLabel, Func<string> getIconName, Action warp)
         {
-            if (WarpHandler.CustomLocs.ContainsKey(ID))
+            if (Utils.CustomLocs.ContainsKey(ID))
             {
-                WarpHandler.CustomLocs.Remove(ID);
+                Utils.CustomLocs.Remove(ID);
             }
-            WarpHandler.CustomLocs.Add(ID, new WarpNetHandler(getEnabled, getIconName, getLabel, warp));
+            Utils.CustomLocs.Add(ID, new WarpNetHandler(getEnabled, getIconName, getLabel, warp));
         }
         public bool CanWarpTo(string ID)
         {
-            if (WarpHandler.CustomLocs.ContainsKey(ID))
-            {
-                return WarpHandler.CustomLocs[ID].GetEnabled();
-            }
             Dictionary<string, WarpLocation> dict = Utils.GetWarpLocations();
             if (dict.ContainsKey(ID))
             {
@@ -48,7 +44,7 @@ namespace WarpNetwork.api
         }
         public string[] GetDestinations()
         {
-            return Utils.GetWarpLocations().Keys.Concat(WarpHandler.CustomLocs.Keys).ToArray();
+            return Utils.GetWarpLocations().Keys.ToArray();
         }
         public bool DestinationExists(string ID)
         {
@@ -56,11 +52,11 @@ namespace WarpNetwork.api
         }
         public bool DestinationIsCustomHandler(string ID)
         {
-            return WarpHandler.CustomLocs.ContainsKey(ID);
+            return Utils.CustomLocs.ContainsKey(ID);
         }
         public void RemoveCustomDestinationHandler(string ID)
         {
-            WarpHandler.CustomLocs.Remove(ID);
+            Utils.CustomLocs.Remove(ID);
         }
         public void ShowWarpMenu(bool force = false)
         {

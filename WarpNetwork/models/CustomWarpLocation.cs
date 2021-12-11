@@ -4,7 +4,7 @@ namespace WarpNetwork.models
 {
     class CustomWarpLocation : WarpLocation
     {
-        private readonly IWarpNetHandler handler;
+        public readonly IWarpNetHandler handler;
         public CustomWarpLocation(IWarpNetHandler handler) : base()
         {
             this.handler = handler;

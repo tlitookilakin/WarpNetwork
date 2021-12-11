@@ -101,10 +101,9 @@ namespace WarpNetwork
         private static void GetLocations(string[] args)
         {
             Dictionary<string, WarpLocation> dict = Utils.GetWarpLocations();
-            StringBuilder builder = new StringBuilder(14 * dict.Count + 6 * WarpHandler.CustomLocs.Count);
-            foreach (string key in dict.Keys)
+            StringBuilder builder = new StringBuilder(16 * dict.Count);
+            foreach ((string key, WarpLocation loc) in dict)
             {
-                WarpLocation loc = dict[key];
                 builder.AppendLine();
                 builder.Append(key).AppendLine(":");
                 builder.Append("\tLocation: ").Append(loc.Location);
@@ -112,14 +111,7 @@ namespace WarpNetwork
                 builder.Append(", X: ").Append(loc.X);
                 builder.Append(", Y: ").Append(loc.Y);
                 builder.Append(", Label: '").Append(loc.Label).AppendLine("'");
-            }
-            foreach(string key in WarpHandler.CustomLocs.Keys)
-            {
-                IWarpNetHandler handler = WarpHandler.CustomLocs[key];
-                builder.AppendLine();
-                builder.Append(key).AppendLine(":");
-                builder.Append("\t<Custom Handler>");
-                builder.Append(", Enabled: ").AppendLine(handler.GetEnabled().ToString());
+                builder.Append(", Is Custom Handler: ").Append(loc is CustomWarpLocation ? "Yes" : "No");
             }
             print(builder.ToString());
         }

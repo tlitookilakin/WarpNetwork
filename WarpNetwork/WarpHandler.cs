@@ -20,7 +20,6 @@ namespace WarpNetwork
         internal static bool FromWand = false;
         internal static bool ConsumeOnSelect = false;
         internal static Point? DesertWarp = null;
-        public static Dictionary<string, IWarpNetHandler> CustomLocs = new(StringComparer.OrdinalIgnoreCase);
         internal static void Init(IMonitor monitor, IModHelper helper, Config config)
         {
             Monitor = monitor;
@@ -54,8 +53,7 @@ namespace WarpNetwork
                 WarpLocation loc = locs[id];
                 string normid = id.ToLower();
                 if (
-                    !loc.AlwaysHide &&
-                    !CustomLocs.ContainsKey(id) && (
+                    !loc.AlwaysHide && (
                     normalized == "_force" || 
                     (loc.Enabled && normid != normalized) || 
                     (normid == "farm" && normalized == "_wand")
@@ -69,14 +67,6 @@ namespace WarpNetwork
                     {
                         Monitor.Log("Invalid Location name '"+loc.Location+"'; skipping entry.", LogLevel.Warn);
                     }
-                }
-            }
-            foreach (string id in CustomLocs.Keys)
-            {
-                IWarpNetHandler handler = CustomLocs[id];
-                if(normalized == "_force" || (handler.GetEnabled() && id.ToLowerInvariant() != normalized))
-                {
-                    dests.Add(new CustomWarpLocation(handler));
                 }
             }
             if(dests.Count == 0)
@@ -97,15 +87,6 @@ namespace WarpNetwork
                 ConsumeOnSelect = false;
                 FromWand = false;
                 return;
-            }
-            if (CustomLocs.ContainsKey(answer))
-            {
-                if (ConsumeOnSelect)
-                {
-                    who.reduceActiveItemByOne();
-                }
-                ConsumeOnSelect = false;
-                FromWand = false;
             }
             else
             {
@@ -162,19 +143,6 @@ namespace WarpNetwork
                 ShowFailureText();
                 return false;
             }
-            if (CustomLocs.ContainsKey(location))
-            {
-                IWarpNetHandler cloc = CustomLocs[location];
-                if(force || cloc.GetEnabled())
-                {
-                    cloc.Warp();
-                    return true;
-                } else
-                {
-                    ShowFailureText();
-                    return false;
-                }
-            }
             Dictionary<String, WarpLocation> locs = Utils.GetWarpLocations();
             WarpLocation loc = locs[location];
             if (locs.ContainsKey(location))
@@ -216,6 +184,11 @@ namespace WarpNetwork
         }
         private static void WarpToLocation(WarpLocation where)
         {
+            if(where is CustomWarpLocation custom)
+            {
+                custom.handler.Warp();
+                return;
+            }
             int x = where.X;
             int y = where.Y;
             if (where.Location == "Farm")

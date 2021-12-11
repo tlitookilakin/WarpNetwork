@@ -29,8 +29,20 @@ namespace WarpNetwork
                         {
                             return;
                         }
-                        int id = who.ActiveObject.ParentSheetIndex;
-                        if(UseItem(who, id))
+                        string id = null;
+                        bool isDGA = false;
+                        if(ModEntry.dgaAPI != null)
+                        {
+                            id = ModEntry.dgaAPI.GetDGAItemId(who.ActiveObject);
+                            isDGA = true;
+
+                        }
+                        if(id == null)
+                        {
+                            id = who.ActiveObject.ParentSheetIndex.ToString();
+                            isDGA = false;
+                        }
+                        if(UseItem(who, id, isDGA))
                         {
                             ModEntry.helper.Input.Suppress(action.Button);
                         }
@@ -45,13 +57,12 @@ namespace WarpNetwork
                 }
             }
         }
-        private static bool UseItem(Farmer who, int id)
+        private static bool UseItem(Farmer who, string id, bool isDGA)
         {
             Dictionary<string, WarpItem> items = Utils.GetWarpItems();
-            string key = id.ToString();
-            if (items.ContainsKey(key))
+            if (items.ContainsKey(id))
             {
-                WarpItem item = items[key];
+                WarpItem item = items[id];
                 if(item.Destination.ToLower() == "_all")
                 {
                     WarpHandler.ConsumeOnSelect = item.Consume;
@@ -59,7 +70,7 @@ namespace WarpNetwork
                     return true;
                 }
                 Color color = Utils.ParseColor(item.Color);
-                DoTotemWarpEffects(color, id, item.Consume, who, (f) => WarpHandler.DirectWarp(item.Destination, item.IgnoreDisabled));
+                DoTotemWarpEffects(color, id, isDGA, item.Consume, who, (f) => WarpHandler.DirectWarp(item.Destination, item.IgnoreDisabled));
                 return true;
             }
             return false;
@@ -81,8 +92,9 @@ namespace WarpNetwork
                     !who.onBridge
                     );
         }
-        private static void DoTotemWarpEffects(Color color, int id, bool Consume, Farmer who, Func<Farmer, bool> action)
+        private static void DoTotemWarpEffects(Color color, string id, bool isDGA, bool Consume, Farmer who, Func<Farmer, bool> action)
         {
+            int index = isDGA ? Utils.GetDeterministicHashCode(id) : int.Parse(id);
             who.jitterStrength = 1f;
             who.currentLocation.playSound("warrior", NetAudio.SoundContext.Default);
             who.faceDirection(2);
@@ -109,7 +121,7 @@ namespace WarpNetwork
             // reflection
             Multiplayer mp = ModEntry.helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
             // --
-            mp.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite(id, 9999f, 1, 999, who.Position + new Vector2(0.0f, -96f), false, false, false, 0.0f)
+            mp.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(0.0f, -96f), false, false, false, 0.0f)
             {
                 motion = new Vector2(0.0f, -1f),
                 scaleChange = 0.01f,
@@ -122,7 +134,7 @@ namespace WarpNetwork
                 xPeriodicRange = 4f,
                 layerDepth = 1f
             });
-            mp.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite(id, 9999f, 1, 999, who.Position + new Vector2(-64f, -96f), false, false, false, 0.0f)
+            mp.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(-64f, -96f), false, false, false, 0.0f)
             {
                 motion = new Vector2(0.0f, -0.5f),
                 scaleChange = 0.005f,
@@ -137,7 +149,7 @@ namespace WarpNetwork
                 xPeriodicRange = 4f,
                 layerDepth = 0.9999f
             });
-            mp.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite(id, 9999f, 1, 999, who.Position + new Vector2(64f, -96f), false, false, false, 0.0f)
+            mp.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(64f, -96f), false, false, false, 0.0f)
             {
                 motion = new Vector2(0.0f, -0.5f),
                 scaleChange = 0.005f,

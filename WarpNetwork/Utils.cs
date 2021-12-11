@@ -14,6 +14,7 @@ namespace WarpNetwork
 {
     class Utils
     {
+        public static Dictionary<string, IWarpNetHandler> CustomLocs = new(StringComparer.OrdinalIgnoreCase);
         private static readonly string[] VanillaMapNames =
         {
             "Farm","Farm_Fishing","Farm_Foraging","Farm_Mining","Farm_Combat","Farm_FourCorners","Farm_Island"
@@ -101,7 +102,19 @@ namespace WarpNetwork
         public static Dictionary<string, WarpLocation> GetWarpLocations()
         {
             Dictionary<string, WarpLocation> data = ModEntry.helper.Content.Load<Dictionary<string, WarpLocation>>(ModEntry.pathLocData, ContentSource.GameContent);
-            return new Dictionary<string, WarpLocation>(data, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, WarpLocation> ret = new(data, StringComparer.OrdinalIgnoreCase);
+            foreach((string key, IWarpNetHandler value) in CustomLocs)
+            {
+                if (ret.ContainsKey(key))
+                {
+                    ModEntry.monitor.Log("Overwriting destination '" + key + "' with custom handler", LogLevel.Debug);
+                    ret[key] = new CustomWarpLocation(value);
+                } else
+                {
+                    ret.Add(key, new CustomWarpLocation(value));
+                }
+            }
+            return ret;
         }
         public static Dictionary<string, WarpItem> GetWarpItems()
         {
@@ -178,12 +191,12 @@ namespace WarpNetwork
         }
         public static bool LocationExists(string name)
         {
-            return WarpHandler.CustomLocs.ContainsKey(name) || GetWarpLocations().ContainsKey(name);
+            return GetWarpLocations().ContainsKey(name);
         }
         public static bool IsLocationEnabled(string name)
         {
             Dictionary<string, WarpLocation> dests = GetWarpLocations();
-            return WarpHandler.CustomLocs.ContainsKey(name) ? WarpHandler.CustomLocs[name].GetEnabled() : dests.ContainsKey(name) && dests[name].Enabled;
+            return dests.ContainsKey(name) && dests[name].Enabled;
         }
         public static string IterableToString(IEnumerable<object> iter)
         {
@@ -199,9 +212,9 @@ namespace WarpNetwork
         }
         internal static IWarpNetHandler WrapHandlerObject(object obj)
         {
-            if(obj is IWarpNetHandler)
+            if(obj is IWarpNetHandler handler)
             {
-                return (IWarpNetHandler)obj;
+                return handler;
             }
             Type type = obj.GetType();
             try
@@ -226,6 +239,25 @@ namespace WarpNetwork
                 throw new InvalidCastException("Type '" + type.FullName + "' does not contain method '" + name + "'.");
             }
             return Expression.Lambda<T>(Expression.Call(Expression.Constant(type), method)).Compile();
+        }
+        //Used to get DGA item #
+        public static int GetDeterministicHashCode(string str)
+        {
+            unchecked
+            {
+                int hash1 = (5381 << 16) + 5381;
+                int hash2 = hash1;
+
+                for (int i = 0; i < str.Length; i += 2)
+                {
+                    hash1 = ((hash1 << 5) + hash1) ^ str[i];
+                    if (i == str.Length - 1)
+                        break;
+                    hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
+                }
+
+                return hash1 + (hash2 * 1566083941);
+            }
         }
     }
 }

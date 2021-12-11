@@ -20,6 +20,7 @@ namespace WarpNetwork
         internal static Config config;
         internal static IModHelper helper;
         internal static IMonitor monitor;
+        internal static IDynamicGameAssets dgaAPI = null;
         public static API api = new API();
         public override void Entry(IModHelper helper)
         {
@@ -32,6 +33,8 @@ namespace WarpNetwork
             helper.Events.Input.ButtonPressed += ItemHandler.ButtonPressed;
             helper.Events.Player.Warped += ObeliskPatch.MoveAfterWarp;
             SpaceEvents.ActionActivated += WarpHandler.HandleAction;
+            if (helper.ModRegistry.IsLoaded("spacechase0.DynamicGameAssets"))
+                dgaAPI = helper.ModRegistry.GetApi<IDynamicGameAssets>("spacechase0.DynamicGameAssets");
         }
         public void GameLaunched(object sender, GameLaunchedEventArgs ev)
         {
