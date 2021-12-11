@@ -1,12 +1,10 @@
-﻿using System;
-using Microsoft.Xna.Framework;
-using StardewModdingAPI;
+﻿using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
-using StardewValley;
 using SpaceCore.Events;
 using System.Collections.Generic;
 using System.IO;
+using WarpNetwork.api;
+using WarpNetwork.models;
 
 namespace WarpNetwork
 {
@@ -19,11 +17,9 @@ namespace WarpNetwork
         //main
         internal static Config Config;
         public static API api = new API();
-        public static bool IslandObeliskFixed = false;
         public override void Entry(IModHelper helper)
         {
             Config = helper.ReadConfig<Config>();
-            IslandObeliskFixed = helper.ModRegistry.IsLoaded("tlitookilakin.farmwarpspatch") || helper.ModRegistry.IsLoaded("FlashShifter.SVECode");
             CommandHandler.Init(Monitor, helper);
             WarpHandler.Init(Monitor, helper, Config);
             ItemHandler.Init(Monitor, helper, Config);

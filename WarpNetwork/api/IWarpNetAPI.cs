@@ -1,10 +1,13 @@
 ﻿
 
-namespace WarpNetwork
+using System;
+
+namespace WarpNetwork.api
 {
     public interface IWarpNetAPI
     {
-        void AddCustomDestinationHandler(string ID, IWarpNetHandler handler);
+        bool AddCustomDestinationHandler(string ID, object handler);
+        void AddCustomDestinationHandler(string ID, Func<bool> getEnabled, Func<string> getLabel, Func<string> getIconName, Action warp);
         void RemoveCustomDestinationHandler(string ID);
         bool CanWarpTo(string ID);
         bool DestinationExists(string ID);

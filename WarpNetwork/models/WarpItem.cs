@@ -1,7 +1,6 @@
-﻿using Microsoft.Xna.Framework;
-using StardewModdingAPI;
+﻿
 
-namespace WarpNetwork
+namespace WarpNetwork.models
 {
     class WarpItem
     {

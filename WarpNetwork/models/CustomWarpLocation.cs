@@ -1,6 +1,6 @@
-﻿
+﻿using WarpNetwork.api;
 
-namespace WarpNetwork
+namespace WarpNetwork.models
 {
     class CustomWarpLocation : WarpLocation
     {

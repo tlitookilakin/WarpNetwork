@@ -1,6 +1,6 @@
 ﻿
 
-namespace WarpNetwork
+namespace WarpNetwork.api
 {
     public interface IWarpNetHandler
     {

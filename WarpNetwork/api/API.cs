@@ -1,18 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WarpNetwork.models;
 
-namespace WarpNetwork
+namespace WarpNetwork.api
 {
     public class API : IWarpNetAPI
     {
-        public void AddCustomDestinationHandler(string ID, IWarpNetHandler handler)
+        public bool AddCustomDestinationHandler(string ID, object handler)
         {
             if (WarpHandler.CustomLocs.ContainsKey(ID))
             {
                 WarpHandler.CustomLocs.Remove(ID);
             }
-            WarpHandler.CustomLocs.Add(ID, handler);
+            IWarpNetHandler h = Utils.WrapHandlerObject(handler);
+            if (h != null)
+            {
+                WarpHandler.CustomLocs.Add(ID, h);
+                return true;
+            }
+            return false;
+        }
+        public void AddCustomDestinationHandler(string ID, Func<bool> getEnabled, Func<string> getLabel, Func<string> getIconName, Action warp)
+        {
+            if (WarpHandler.CustomLocs.ContainsKey(ID))
+            {
+                WarpHandler.CustomLocs.Remove(ID);
+            }
+            WarpHandler.CustomLocs.Add(ID, new WarpNetHandler(getEnabled, getIconName, getLabel, warp));
         }
         public bool CanWarpTo(string ID)
         {

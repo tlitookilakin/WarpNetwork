@@ -5,6 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using xTile;
+using WarpNetwork.models;
+using System.Reflection;
+using WarpNetwork.api;
+using System.Linq.Expressions;
 
 namespace WarpNetwork
 {
@@ -200,6 +204,36 @@ namespace WarpNetwork
             }
             sb.Append("]");
             return sb.ToString();
+        }
+        internal static IWarpNetHandler WrapHandlerObject(object obj)
+        {
+            if(obj is IWarpNetHandler)
+            {
+                return (IWarpNetHandler)obj;
+            }
+            Type type = obj.GetType();
+            try
+            {
+                return new WarpNetHandler(
+                    getMethodOf<Func<bool>>(type, "GetEnabled"),
+                    getMethodOf<Func<string>>(type, "GetIconName"),
+                    getMethodOf<Func<string>>(type, "GetLabel"),
+                    getMethodOf<Action>(type, "Warp")
+                    );
+            } catch(InvalidCastException e)
+            {
+                Monitor.Log("Could not wrap object of type '" + type.FullName + "': " + e.Message, LogLevel.Error);
+                return null;
+            }
+        }
+        public static T getMethodOf<T>(Type type, string name)
+        {
+            MethodInfo method = type.GetMethod(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static);
+            if(method == null)
+            {
+                throw new InvalidCastException("Type '" + type.FullName + "' does not contain method '" + name + "'.");
+            }
+            return Expression.Lambda<T>(Expression.Call(Expression.Constant(type), method)).Compile();
         }
     }
 }

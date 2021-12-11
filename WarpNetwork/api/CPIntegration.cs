@@ -1,6 +1,6 @@
 ﻿using StardewModdingAPI;
 
-namespace WarpNetwork
+namespace WarpNetwork.api
 {
     class CPIntegration
     {

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace WarpNetwork
+namespace WarpNetwork.api
 {
     public interface IContentPatcherAPI
     {

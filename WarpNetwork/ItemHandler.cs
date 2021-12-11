@@ -7,6 +7,7 @@ using StardewValley.Objects;
 using StardewValley.Tools;
 using System;
 using System.Collections.Generic;
+using WarpNetwork.models;
 
 namespace WarpNetwork
 {

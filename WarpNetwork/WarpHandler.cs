@@ -6,6 +6,8 @@ using StardewValley.Locations;
 using StardewValley.Network;
 using System;
 using System.Collections.Generic;
+using WarpNetwork.models;
+using WarpNetwork.api;
 
 namespace WarpNetwork
 {

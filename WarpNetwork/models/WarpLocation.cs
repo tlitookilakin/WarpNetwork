@@ -1,6 +1,6 @@
 ﻿using xTile.Dimensions;
 
-namespace WarpNetwork
+namespace WarpNetwork.models
 {
     class WarpLocation
     {
