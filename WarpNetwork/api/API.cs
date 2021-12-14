@@ -7,19 +7,13 @@ namespace WarpNetwork.api
 {
     public class API : IWarpNetAPI
     {
-        public bool AddCustomDestinationHandler(string ID, object handler)
+        public void AddCustomDestinationHandler(string ID, IWarpNetHandler handler)
         {
             if (Utils.CustomLocs.ContainsKey(ID))
             {
                 Utils.CustomLocs.Remove(ID);
             }
-            IWarpNetHandler h = Utils.WrapHandlerObject(handler);
-            if (h != null)
-            {
-                Utils.CustomLocs.Add(ID, h);
-                return true;
-            }
-            return false;
+            Utils.CustomLocs.Add(ID, handler);
         }
         public void AddCustomDestinationHandler(string ID, Func<bool> getEnabled, Func<string> getLabel, Func<string> getIconName, Action warp)
         {

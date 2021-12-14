@@ -30,19 +30,16 @@ namespace WarpNetwork
                             return;
                         }
                         string id = null;
-                        bool isDGA = false;
                         if(ModEntry.dgaAPI != null)
                         {
                             id = ModEntry.dgaAPI.GetDGAItemId(who.ActiveObject);
-                            isDGA = true;
 
                         }
                         if(id == null)
                         {
                             id = who.ActiveObject.ParentSheetIndex.ToString();
-                            isDGA = false;
                         }
-                        if(UseItem(who, id, isDGA))
+                        if(UseItem(who, id))
                         {
                             ModEntry.helper.Input.Suppress(action.Button);
                         }
@@ -57,7 +54,7 @@ namespace WarpNetwork
                 }
             }
         }
-        private static bool UseItem(Farmer who, string id, bool isDGA)
+        private static bool UseItem(Farmer who, string id)
         {
             Dictionary<string, WarpItem> items = Utils.GetWarpItems();
             if (items.ContainsKey(id))
@@ -70,7 +67,7 @@ namespace WarpNetwork
                     return true;
                 }
                 Color color = Utils.ParseColor(item.Color);
-                DoTotemWarpEffects(color, id, isDGA, item.Consume, who, (f) => WarpHandler.DirectWarp(item.Destination, item.IgnoreDisabled));
+                DoTotemWarpEffects(color, id, item.Consume, who, (f) => WarpHandler.DirectWarp(item.Destination, item.IgnoreDisabled));
                 return true;
             }
             return false;
@@ -92,9 +89,12 @@ namespace WarpNetwork
                     !who.onBridge
                     );
         }
-        private static void DoTotemWarpEffects(Color color, string id, bool isDGA, bool Consume, Farmer who, Func<Farmer, bool> action)
+        private static void DoTotemWarpEffects(Color color, string id, bool Consume, Farmer who, Func<Farmer, bool> action)
         {
-            int index = isDGA ? Utils.GetDeterministicHashCode(id) : int.Parse(id);
+            if(!int.TryParse(id, out int index))
+            {
+                index = Utils.GetDeterministicHashCode(id);
+            }
             who.jitterStrength = 1f;
             who.currentLocation.playSound("warrior", NetAudio.SoundContext.Default);
             who.faceDirection(2);

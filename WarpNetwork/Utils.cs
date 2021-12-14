@@ -210,36 +210,6 @@ namespace WarpNetwork
             sb.Append("]");
             return sb.ToString();
         }
-        internal static IWarpNetHandler WrapHandlerObject(object obj)
-        {
-            if(obj is IWarpNetHandler handler)
-            {
-                return handler;
-            }
-            Type type = obj.GetType();
-            try
-            {
-                return new WarpNetHandler(
-                    getMethodOf<Func<bool>>(type, "GetEnabled"),
-                    getMethodOf<Func<string>>(type, "GetIconName"),
-                    getMethodOf<Func<string>>(type, "GetLabel"),
-                    getMethodOf<Action>(type, "Warp")
-                    );
-            } catch(InvalidCastException e)
-            {
-                ModEntry.monitor.Log("Could not wrap object of type '" + type.FullName + "': " + e.Message, LogLevel.Error);
-                return null;
-            }
-        }
-        internal static T getMethodOf<T>(Type type, string name)
-        {
-            MethodInfo method = type.GetMethod(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static);
-            if(method == null)
-            {
-                throw new InvalidCastException("Type '" + type.FullName + "' does not contain method '" + name + "'.");
-            }
-            return Expression.Lambda<T>(Expression.Call(Expression.Constant(type), method)).Compile();
-        }
         //Used to get DGA item #
         public static int GetDeterministicHashCode(string str)
         {
