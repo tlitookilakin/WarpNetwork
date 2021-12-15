@@ -210,6 +210,23 @@ namespace WarpNetwork
             sb.Append("]");
             return sb.ToString();
         }
+        public static void reduceItemCount(Farmer who, Item what, int count)
+        {
+            if(what == null)
+                return;
+            what.Stack -= count;
+            if(what != null && what.Stack <= 0)
+            {
+                if(who != null)
+                {
+                    if (what == who.CurrentItem)
+                    {
+                        who.showNotCarrying();
+                    }
+                    who.removeItemFromInventory(what);
+                }
+            }
+        }
         //Used to get DGA item #
         public static int GetDeterministicHashCode(string str)
         {

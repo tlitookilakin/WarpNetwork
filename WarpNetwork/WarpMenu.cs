@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
+using System;
 using System.Collections.Generic;
 using WarpNetwork.models;
 
@@ -24,13 +25,15 @@ namespace WarpNetwork
         private int index = 0;
         private bool autoAlign = false;
         private Rectangle mainPanel = new(0, 27, 0, 0);
+        private Action<WarpLocation> callback;
         internal bool hovering = false;
-        public WarpMenu(List<WarpLocation> locs, int x = 0, int y = 0, int width = 0, int height = 0)
+        public WarpMenu(List<WarpLocation> locs, Action<WarpLocation> callback, int x = 0, int y = 0, int width = 0, int height = 0)
       : base(x, y, width, height, true)
         {
             autoAlign = x == 0 && y == 0;
             this.width = width != 0 ? width : 600;
             this.height = height != 0 ? height : 350;
+            this.callback = callback;
             this.locs = locs;
             if(locs.Count < 1)
             {
@@ -138,7 +141,7 @@ namespace WarpNetwork
                         if(button.location != null)
                         {
                             ModEntry.monitor.Log("Destination selected! Closing menu and warping...");
-                            WarpHandler.WarpToLocation(button.location);
+                            callback(button.location);
                             exitThisMenuNoSound();
                         }
                         else

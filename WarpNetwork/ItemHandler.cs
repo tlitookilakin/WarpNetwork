@@ -62,8 +62,7 @@ namespace WarpNetwork
                 WarpItem item = items[id];
                 if(item.Destination.ToLower() == "_all")
                 {
-                    WarpHandler.ConsumeOnSelect = item.Consume;
-                    WarpHandler.ShowWarpMenu();
+                    WarpHandler.ShowWarpMenu("", item.Consume);
                     return true;
                 }
                 Color color = Utils.ParseColor(item.Color);

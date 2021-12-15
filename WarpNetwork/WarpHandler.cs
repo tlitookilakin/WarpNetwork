@@ -13,10 +13,8 @@ namespace WarpNetwork
 {
     class WarpHandler
     {
-        internal static bool FromWand = false;
-        internal static bool ConsumeOnSelect = false;
         internal static Point? DesertWarp = null;
-        public static void ShowWarpMenu(string exclude = "")
+        public static void ShowWarpMenu(string exclude = "", bool consume = false)
         {
             if (!ModEntry.config.MenuEnabled)
             {
@@ -65,9 +63,11 @@ namespace WarpNetwork
                 ShowFailureText();
                 return;
             }
-
-            FromWand = normalized == "_wand";
-            Game1.activeClickableMenu = new WarpMenu(dests);
+            Item stack = consume ? Game1.player.CurrentItem : null;
+            Game1.activeClickableMenu = new WarpMenu(dests, (WarpLocation where) => {
+                WarpToLocation(where, normalized == "_wand");
+                Utils.reduceItemCount(Game1.player, stack, 1);
+                });
         }
         private static void ShowFailureText()
         {
@@ -148,7 +148,7 @@ namespace WarpNetwork
                 return false;
             }
         }
-        internal static void WarpToLocation(WarpLocation where)
+        internal static void WarpToLocation(WarpLocation where, bool fromWand = false)
         {
             if(where is CustomWarpLocation custom)
             {
@@ -159,10 +159,9 @@ namespace WarpNetwork
             int y = where.Y;
             if (where.Location == "Farm")
             {
-                if(FromWand)
+                if(fromWand)
                 {
                     Point dest = GetFrontDoor(Game1.player);
-                    FromWand = false;
                     DoWarpEffects(() => Game1.warpFarmer("Farm", dest.X, dest.Y, false));
                     return;
                 }
@@ -170,7 +169,6 @@ namespace WarpNetwork
                 x = farmTotem.X;
                 y = farmTotem.Y;
             }
-            FromWand = false;
             if(where.Location == "Desert")
             {
                 //desert has bus scene hardcoded. Must warp to hardcoded spot, then use obelisk patch to move the player afterwards.

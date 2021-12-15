@@ -190,12 +190,11 @@ namespace WarpNetwork
             GetItems(args);
             GetHeldID(args);
             print(ModEntry.config.AsText());
-            StringBuilder sb = new StringBuilder(17);
+            StringBuilder sb = new StringBuilder(15);
             sb.AppendLine();
             sb.Append("Location: ").AppendLine(Game1.player.currentLocation.Name);
             sb.Append("Position: ").AppendLine(Game1.player.getTileLocationPoint().ToString());
             sb.Append("DesertWarp: ").AppendLine(WarpHandler.DesertWarp.ToString());
-            sb.Append("FromWand: ").AppendLine(WarpHandler.FromWand.ToString());
             sb.Append("WarpNetworkEntry: ").AppendLine(Game1.player.currentLocation.getMapProperty("WarpNetworkEntry"));
             sb.Append("Is Multiplayer: ").AppendLine(Game1.IsMultiplayer.ToString());
             sb.Append("Is Host: ").AppendLine(Game1.IsMasterGame.ToString());
