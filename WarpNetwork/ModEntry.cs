@@ -1,12 +1,12 @@
-﻿using StardewModdingAPI;
-using StardewModdingAPI.Events;
+﻿using Microsoft.Xna.Framework.Graphics;
 using SpaceCore.Events;
+using StardewModdingAPI;
+using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using System.Collections.Generic;
 using System.IO;
 using WarpNetwork.api;
 using WarpNetwork.models;
-using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI.Utilities;
 
 namespace WarpNetwork
 {
@@ -22,7 +22,7 @@ namespace WarpNetwork
         internal static IModHelper helper;
         internal static IMonitor monitor;
         internal static IDynamicGameAssets dgaAPI = null;
-        public static API api = new API();
+        public static API api = new();
         public override void Entry(IModHelper helper)
         {
             config = helper.ReadConfig<Config>();
@@ -67,16 +67,18 @@ namespace WarpNetwork
                 Dictionary<string, WarpItem> items = Helper.Content.Load<Dictionary<string, WarpItem>>(Path.Combine("assets", "WarpItems.json"));
                 DataPatcher.AddApiItems(items);
                 return (T)(object)items;
-            } else if (asset.AssetNameEquals(pathLocData))
+            }
+            else if (asset.AssetNameEquals(pathLocData))
             {
                 Dictionary<string, WarpLocation> locs = Helper.Content.Load<Dictionary<string, WarpLocation>>(Path.Combine("assets", "Destinations.json"));
                 DataPatcher.EditLocationsEnabled(locs);
                 DataPatcher.AddApiLocs(locs);
                 DataPatcher.TranslateDefaultWarps(locs);
                 return (T)(object)locs;
-            } else if (asset.AssetName.StartsWith(pathIcons))
+            }
+            else if (asset.AssetName.StartsWith(pathIcons))
             {
-                return (T)(object)Helper.Content.Load<Texture2D>(Path.Combine("assets", "icons", asset.AssetName.Remove(0, pathIcons.Length)+".png"));
+                return (T)(object)Helper.Content.Load<Texture2D>(Path.Combine("assets", "icons", asset.AssetName.Remove(0, pathIcons.Length) + ".png"));
             }
             return default;
         }

@@ -12,20 +12,22 @@ namespace WarpNetwork.models
         public string Location { set; get; }
         public int X { set; get; } = 0;
         public int Y { set; get; } = 1;
-        virtual public bool Enabled { set; get; } = false;
-        virtual public string Label { set; get; }
+        public virtual bool Enabled { set; get; } = false;
+        public virtual string Label { set; get; }
         public bool OverrideMapProperty { set; get; } = false;
         public bool AlwaysHide { get; set; } = false;
-        virtual public string Icon { set; get; } = "";
+        public virtual string Icon { set; get; } = "";
         public Texture2D IconTex
         {
-            get {
+            get
+            {
                 if (cachedIcon == null)
                 {
                     try
                     {
                         cachedIcon = ModEntry.helper.Content.Load<Texture2D>("Data/WarpNetwork/Icons/" + Icon, ContentSource.GameContent);
-                    } catch (ContentLoadException)
+                    }
+                    catch (ContentLoadException)
                     {
                         cachedIcon = ModEntry.helper.Content.Load<Texture2D>("Data/WarpNetwork/Icons/DEFAULT", ContentSource.GameContent);
                     }

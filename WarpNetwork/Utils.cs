@@ -4,11 +4,9 @@ using StardewValley;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using xTile;
-using WarpNetwork.models;
-using System.Reflection;
 using WarpNetwork.api;
-using System.Linq.Expressions;
+using WarpNetwork.models;
+using xTile;
 
 namespace WarpNetwork
 {
@@ -19,15 +17,15 @@ namespace WarpNetwork
         {
             "Farm","Farm_Fishing","Farm_Foraging","Farm_Mining","Farm_Combat","Farm_FourCorners","Farm_Island"
         };
-        private static readonly Dictionary<string, int> FarmTypeMap = new Dictionary<string, int>()
+        private static readonly Dictionary<string, int> FarmTypeMap = new()
         {
-            {"farm", 0},
-            {"farm_fishing", 1},
-            {"farm_foraging", 2},
-            {"farm_mining", 3},
-            {"farm_combat", 4},
-            {"farm_fourcorners", 5},
-            {"farm_island", 6}
+            { "farm", 0 },
+            { "farm_fishing", 1 },
+            { "farm_foraging", 2 },
+            { "farm_mining", 3 },
+            { "farm_combat", 4 },
+            { "farm_fourcorners", 5 },
+            { "farm_island", 6 }
         };
         public static Point GetActualFarmPoint(int default_x, int default_y)
         {
@@ -54,16 +52,18 @@ namespace WarpNetwork
         }
         public static string GetFarmMapPath()
         {
-            if(Game1.whichFarm < 0)
+            if (Game1.whichFarm < 0)
             {
                 ModEntry.monitor.Log("Something is wrong! Game1.whichfarm does not contain a valid value!", LogLevel.Warn);
                 return "";
 
-            } else if (Game1.whichFarm < 7)
+            }
+            else if (Game1.whichFarm < 7)
             {
                 return VanillaMapNames[Game1.whichFarm];
 
-            } else if (Game1.whichModFarm == null)
+            }
+            else if (Game1.whichModFarm == null)
             {
                 ModEntry.monitor.Log("Something is wrong! Custom farm indicated, but Game1.whichModFarm is null!", LogLevel.Warn);
                 return "";
@@ -75,7 +75,7 @@ namespace WarpNetwork
         }
         public static int GetFarmType(string filename)
         {
-            if(filename is null)
+            if (filename is null)
             {
                 return Game1.whichFarm;
             }
@@ -87,29 +87,30 @@ namespace WarpNetwork
         }
         public static Point GetMapPropertyPosition(Map map, string property, int default_x, int default_y)
         {
-            if(!map.Properties.ContainsKey(property))
+            if (!map.Properties.ContainsKey(property))
             {
                 return new Point(default_x, default_y);
             }
             string prop = map.Properties[property];
             string[] args = prop.Split(' ');
-            if(args.Length < 2)
+            if (args.Length < 2)
             {
                 return new Point(default_x, default_y);
             }
-            return new Point(Int32.Parse(args[0]), Int32.Parse(args[1]));
+            return new Point(int.Parse(args[0]), int.Parse(args[1]));
         }
         public static Dictionary<string, WarpLocation> GetWarpLocations()
         {
             Dictionary<string, WarpLocation> data = ModEntry.helper.Content.Load<Dictionary<string, WarpLocation>>(ModEntry.pathLocData, ContentSource.GameContent);
             Dictionary<string, WarpLocation> ret = new(data, StringComparer.OrdinalIgnoreCase);
-            foreach((string key, IWarpNetHandler value) in CustomLocs)
+            foreach ((string key, IWarpNetHandler value) in CustomLocs)
             {
                 if (ret.ContainsKey(key))
                 {
                     ModEntry.monitor.Log("Overwriting destination '" + key + "' with custom handler", LogLevel.Debug);
                     ret[key] = new CustomWarpLocation(value);
-                } else
+                }
+                else
                 {
                     ret.Add(key, new CustomWarpLocation(value));
                 }
@@ -129,7 +130,8 @@ namespace WarpNetwork
                 if (Enum.IsDefined(type, val))
                 {
                     return val;
-                } else
+                }
+                else
                 {
                     return default;
                 }
@@ -141,14 +143,14 @@ namespace WarpNetwork
         }
         public static Color ParseColor(string str)
         {
-            if(str.Length == 0)
+            if (str.Length == 0)
             {
                 ModEntry.monitor.Log("Could not parse color from string: '" + str + "'.", LogLevel.Warn);
                 return Color.Transparent;
             }
-            if(str[0] == '#')
+            if (str[0] == '#')
             {
-                if(str.Length <= 6)
+                if (str.Length <= 6)
                 {
                     ModEntry.monitor.Log("Could not parse color from string: '" + str + "'.", LogLevel.Warn);
                     return Color.Transparent;
@@ -156,22 +158,23 @@ namespace WarpNetwork
                 int r = Convert.ToInt32(str.Substring(1, 2), 16);
                 int g = Convert.ToInt32(str.Substring(3, 2), 16);
                 int b = Convert.ToInt32(str.Substring(5, 2), 16);
-                if(str.Length > 8)
+                if (str.Length > 8)
                 {
                     int a = Convert.ToInt32(str.Substring(7, 2), 16);
                     return new Color(r, g, b, a);
                 }
                 return new Color(r, g, b);
-            } else
+            }
+            else
             {
                 string[] vals = str.Replace(" ", "").Split(',');
-                if(vals.Length > 2)
+                if (vals.Length > 2)
                 {
-                    if(vals.Length > 3)
+                    if (vals.Length > 3)
                     {
-                        return new Color(Int32.Parse(vals[0]), Int32.Parse(vals[1]), Int32.Parse(vals[2]), Int32.Parse(vals[3]));
+                        return new Color(int.Parse(vals[0]), int.Parse(vals[1]), int.Parse(vals[2]), int.Parse(vals[3]));
                     }
-                    return new Color(Int32.Parse(vals[0]), Int32.Parse(vals[1]), Int32.Parse(vals[2]));
+                    return new Color(int.Parse(vals[0]), int.Parse(vals[1]), int.Parse(vals[2]));
                 }
                 ModEntry.monitor.Log("Could not parse color from string: '" + str + "'.", LogLevel.Warn);
                 return Color.Transparent;
@@ -183,7 +186,7 @@ namespace WarpNetwork
         }
         public static bool IsFestivalReady()
         {
-            if(Game1.weatherIcon != 1)
+            if (Game1.weatherIcon != 1)
             {
                 return false;
             }
@@ -200,7 +203,7 @@ namespace WarpNetwork
         }
         public static string IterableToString(IEnumerable<object> iter)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.Append("[");
             foreach (object item in iter)
             {
@@ -212,12 +215,12 @@ namespace WarpNetwork
         }
         public static void reduceItemCount(Farmer who, Item what, int count)
         {
-            if(what == null)
+            if (what == null)
                 return;
             what.Stack -= count;
-            if(what != null && what.Stack <= 0)
+            if (what != null && what.Stack <= 0)
             {
-                if(who != null)
+                if (who != null)
                 {
                     if (what == who.CurrentItem)
                     {

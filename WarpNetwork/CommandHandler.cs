@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using WarpNetwork.models;
-using WarpNetwork.api;
 
 namespace WarpNetwork
 {
@@ -47,7 +46,7 @@ namespace WarpNetwork
         };
         public static void Main(string cmd, string[] args)
         {
-            if(args.Length == 0)
+            if (args.Length == 0)
             {
                 ShowHelp(args);
                 return;
@@ -55,7 +54,8 @@ namespace WarpNetwork
             if (Cmds.ContainsKey(args[0]))
             {
                 Cmds[args[0]](args.Skip(1).ToArray());
-            } else
+            }
+            else
             {
                 print("\nCommand not recognized.\n");
             }
@@ -66,7 +66,7 @@ namespace WarpNetwork
         }
         private static void ShowHelp(string[] args)
         {
-            if(args.Length > 0)
+            if (args.Length > 0)
             {
                 if (CmdHelp.ContainsKey(args[0]))
                 {
@@ -75,7 +75,7 @@ namespace WarpNetwork
                 }
             }
             StringBuilder builder = new StringBuilder(4 * CmdHelp.Count);
-            foreach(string key in CmdHelp.Keys)
+            foreach (string key in CmdHelp.Keys)
             {
                 builder.AppendLine();
                 builder.Append(key);
@@ -86,12 +86,12 @@ namespace WarpNetwork
         }
         private static void TP(string[] args)
         {
-            if(Game1.currentLocation is null || Game1.player is null)
+            if (Game1.currentLocation is null || Game1.player is null)
             {
                 print("\nGame not loaded, cannot warp!\n");
                 return;
             }
-            if(args.Length == 0)
+            if (args.Length == 0)
             {
                 print("\nMust specify warp network location\n");
                 return;
@@ -119,7 +119,7 @@ namespace WarpNetwork
         {
             Dictionary<string, WarpItem> dict = Utils.GetWarpItems();
             StringBuilder builder = new StringBuilder(10 * dict.Count);
-            foreach(string key in dict.Keys)
+            foreach (string key in dict.Keys)
             {
                 WarpItem item = dict[key];
                 builder.AppendLine();
@@ -134,7 +134,7 @@ namespace WarpNetwork
         {
             GameLocation loc = Game1.currentLocation;
             Farmer who = Game1.player;
-            if(loc is null || who is null)
+            if (loc is null || who is null)
             {
                 print("\nPlayer not loaded!\n");
                 return;
@@ -161,12 +161,12 @@ namespace WarpNetwork
         private static void GetHeldID(string[] args)
         {
             Farmer who = Game1.player;
-            if(who is null)
+            if (who is null)
             {
                 print("\nPlayer not loaded!\n");
                 return;
             }
-            if(who.ActiveObject is null)
+            if (who.ActiveObject is null)
             {
                 print("\nHand is empty!\n");
                 return;

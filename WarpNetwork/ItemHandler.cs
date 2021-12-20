@@ -13,7 +13,8 @@ namespace WarpNetwork
 {
     class ItemHandler
     {
-        public static void ButtonPressed(object sender, ButtonPressedEventArgs action){
+        public static void ButtonPressed(object sender, ButtonPressedEventArgs action)
+        {
             if (action.IsSuppressed())
             {
                 return;
@@ -30,24 +31,25 @@ namespace WarpNetwork
                             return;
                         }
                         string id = null;
-                        if(ModEntry.dgaAPI != null)
+                        if (ModEntry.dgaAPI != null)
                         {
                             id = ModEntry.dgaAPI.GetDGAItemId(who.ActiveObject);
 
                         }
-                        if(id == null)
+                        if (id == null)
                         {
                             id = who.ActiveObject.ParentSheetIndex.ToString();
                         }
-                        if(UseItem(who, id))
+                        if (UseItem(who, id))
                         {
                             ModEntry.helper.Input.Suppress(action.Button);
                         }
                     }
                 }
-            } else if (action.Button.IsUseToolButton() && who.CurrentTool is Wand && ModEntry.config.AccessFromWand && ModEntry.config.MenuEnabled)
+            }
+            else if (action.Button.IsUseToolButton() && who.CurrentTool is Wand && ModEntry.config.AccessFromWand && ModEntry.config.MenuEnabled)
             {
-                if(CanUseHere(who) && who.CanMove)
+                if (CanUseHere(who) && who.CanMove)
                 {
                     WarpHandler.ShowWarpMenu("_wand");
                     ModEntry.helper.Input.Suppress(action.Button);
@@ -60,7 +62,7 @@ namespace WarpNetwork
             if (items.ContainsKey(id))
             {
                 WarpItem item = items[id];
-                if(item.Destination.ToLower() == "_all")
+                if (item.Destination.ToLower() == "_all")
                 {
                     WarpHandler.ShowWarpMenu("", item.Consume);
                     return true;
@@ -90,7 +92,7 @@ namespace WarpNetwork
         }
         private static void DoTotemWarpEffects(Color color, string id, bool Consume, Farmer who, Func<Farmer, bool> action)
         {
-            if(!int.TryParse(id, out int index))
+            if (!int.TryParse(id, out int index))
             {
                 index = Utils.GetDeterministicHashCode(id);
             }
@@ -120,7 +122,7 @@ namespace WarpNetwork
             // reflection
             Multiplayer mp = ModEntry.helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
             // --
-            mp.broadcastSprites(who.currentLocation, 
+            mp.broadcastSprites(who.currentLocation,
             new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(0.0f, -96f), false, false, false, 0.0f)
             {
                 motion = new Vector2(0.0f, -1f),

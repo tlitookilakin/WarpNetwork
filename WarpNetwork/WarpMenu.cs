@@ -35,9 +35,9 @@ namespace WarpNetwork
             this.height = height != 0 ? height : 350;
             this.callback = callback;
             this.locs = locs;
-            if(locs.Count < 1)
+            if (locs.Count < 1)
             {
-                ModEntry.monitor.Log("Warp menu created with no destinations!",LogLevel.Warn);
+                ModEntry.monitor.Log("Warp menu created with no destinations!", LogLevel.Warn);
                 exitThisMenuNoSound();
             }
             title = ModEntry.helper.Translation.Get("ui-label");
@@ -52,7 +52,7 @@ namespace WarpNetwork
         }
         public override void snapToDefaultClickableComponent()
         {
-            if(buttons.Count < 1)
+            if (buttons.Count < 1)
             {
                 exitThisMenu();
                 return;
@@ -66,9 +66,9 @@ namespace WarpNetwork
             index = MathHelper.Clamp(what, 0, MathHelper.Max(0, locs.Count - buttons.Count));
             if (index == l_index)
                 return;
-            if(playSound)
+            if (playSound)
                 Game1.playSound("shwip");
-            for (int i = 0; i < buttons.Count; i ++)
+            for (int i = 0; i < buttons.Count; i++)
             {
                 buttons[i].location = locs[i + index];
             }
@@ -84,10 +84,11 @@ namespace WarpNetwork
         public override void receiveScrollWheelAction(int direction)
         {
             base.receiveScrollWheelAction(direction);
-            if(direction > 0)
+            if (direction > 0)
             {
                 setIndex(index - 1);
-            }else if(direction < 0)
+            }
+            else if (direction < 0)
             {
                 setIndex(index + 1);
             }
@@ -99,19 +100,21 @@ namespace WarpNetwork
             switch (direction)
             {
                 case 0:
-                    if(currentlySnappedComponent is WarpButton w && w.index == 0 && index > 0)
+                    if (currentlySnappedComponent is WarpButton w && w.index == 0 && index > 0)
                     {
                         setIndex(index - 1);
-                    } else if(currentlySnappedComponent != null)
+                    }
+                    else if (currentlySnappedComponent != null)
                     {
                         setCurrentlySnappedComponentTo(currentlySnappedComponent.upNeighborID);
                     }
                     break;
                 case 2:
-                    if(currentlySnappedComponent is WarpButton w2 && w2.index == buttons.Count - 1 && index < locs.Count - 1)
+                    if (currentlySnappedComponent is WarpButton w2 && w2.index == buttons.Count - 1 && index < locs.Count - 1)
                     {
                         setIndex(index + 1);
-                    } else if(currentlySnappedComponent != null)
+                    }
+                    else if (currentlySnappedComponent != null)
                     {
                         setCurrentlySnappedComponentTo(currentlySnappedComponent.downNeighborID);
                     }
@@ -121,10 +124,11 @@ namespace WarpNetwork
         public override void setCurrentlySnappedComponentTo(int id)
         {
             ModEntry.monitor.Log(id.ToString());
-            if(id >= 0 && id < buttons.Count)
+            if (id >= 0 && id < buttons.Count)
             {
                 currentlySnappedComponent = buttons[id];
-            } else
+            }
+            else
             {
                 snapToDefaultClickableComponent();
             }
@@ -132,13 +136,13 @@ namespace WarpNetwork
         }
         public override void receiveLeftClick(int x, int y, bool playSound = true)
         {
-            if(mainPanel.Contains(x - xPositionOnScreen, y - yPositionOnScreen))
+            if (mainPanel.Contains(x - xPositionOnScreen, y - yPositionOnScreen))
             {
-                foreach(WarpButton button in buttons)
+                foreach (WarpButton button in buttons)
                 {
-                    if(button.containsPoint(x, y))
+                    if (button.containsPoint(x, y))
                     {
-                        if(button.location != null)
+                        if (button.location != null)
                         {
                             ModEntry.monitor.Log("Destination selected! Closing menu and warping...");
                             callback(button.location);
@@ -150,10 +154,12 @@ namespace WarpNetwork
                         }
                     }
                 }
-            } else if(upArrow.containsPoint(x, y))
+            }
+            else if (upArrow.containsPoint(x, y))
             {
                 setIndex(index - 1);
-            } else if(downArrow.containsPoint(x, y))
+            }
+            else if (downArrow.containsPoint(x, y))
             {
                 setIndex(index + 1);
             }
@@ -168,26 +174,27 @@ namespace WarpNetwork
         public void resized()
         {
             mainPanel.Width = width;
-            mainPanel.Height = (height - mainPanel.Y - 27)/buttonH*buttonH+27;
+            mainPanel.Height = (height - mainPanel.Y - 27) / buttonH * buttonH + 27;
             upperRightCloseButton.bounds.Location = new(xPositionOnScreen + mainPanel.X + mainPanel.Width - 32, yPositionOnScreen + mainPanel.Y - 16);
             upArrow.bounds.Location = new(xPositionOnScreen + mainPanel.X + mainPanel.Width + 6, yPositionOnScreen + mainPanel.Y + 33);
             downArrow.bounds.Location = new(xPositionOnScreen + mainPanel.X + mainPanel.Width + 6, yPositionOnScreen + mainPanel.Y + mainPanel.Height - 48);
             for (int i = 0; i * buttonH < mainPanel.Height - buttonH - 12; i += 1)
             {
                 Rectangle bound = new(xPositionOnScreen + 12 + mainPanel.X, yPositionOnScreen + i * buttonH + 15 + mainPanel.Y, mainPanel.Width - 24, buttonH);
-                if(buttons.Count <= i && locs.Count > i + index)
+                if (buttons.Count <= i && locs.Count > i + index)
                 {
-                    buttons.Add(new(bound, locs[i + index], i){scale = 3f, myID = i});
-                } 
+                    buttons.Add(new(bound, locs[i + index], i) { scale = 3f, myID = i });
+                }
                 else
                 {
-                    if(locs.Count <= i + index)
+                    if (locs.Count <= i + index)
                     {
                         if (buttons.Count > i)
                         {
                             buttons.RemoveAt(i);
                         }
-                    } else
+                    }
+                    else
                     {
                         buttons[i].bounds = bound;
                         buttons[i].myID = i;
@@ -213,13 +220,13 @@ namespace WarpNetwork
             {
                 drawBackground(b);
             }
-            drawTextureBox(b, Game1.mouseCursors, panel, 
-                xPositionOnScreen + mainPanel.X, 
-                yPositionOnScreen + mainPanel.Y, 
-                mainPanel.Width, 
-                mainPanel.Height, 
+            drawTextureBox(b, Game1.mouseCursors, panel,
+                xPositionOnScreen + mainPanel.X,
+                yPositionOnScreen + mainPanel.Y,
+                mainPanel.Width,
+                mainPanel.Height,
                 Color.White, 3f);
-            foreach(WarpButton button in buttons)
+            foreach (WarpButton button in buttons)
             {
                 button.draw(b);
             }

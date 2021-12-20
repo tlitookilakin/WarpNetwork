@@ -1,20 +1,19 @@
 ﻿using Microsoft.Xna.Framework;
-using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using WarpNetwork.models;
 using System.Collections.Generic;
+using WarpNetwork.models;
 
 namespace WarpNetwork
 {
     class ObeliskPatch
     {
-        private static readonly Dictionary<string, Point> ObeliskTargets = new Dictionary<string, Point>()
+        private static readonly Dictionary<string, Point> ObeliskTargets = new()
         {
-            {"Farm", new Point(48, 7)},
-            {"IslandSouth",new Point(11, 11)},
-            {"Mountain",new Point(31, 20)},
-            {"Beach",new Point(20, 4)},
-            {"Desert",new Point(35, 43)}
+            { "Farm", new Point(48, 7) },
+            { "IslandSouth", new Point(11, 11) },
+            { "Mountain", new Point(31, 20) },
+            { "Beach", new Point(20, 4) },
+            { "Desert", new Point(35, 43) }
         };
         public static void MoveAfterWarp(object sender, WarpedEventArgs ev)
         {
@@ -31,7 +30,8 @@ namespace WarpNetwork
                         Point to = (Point)WarpHandler.DesertWarp;
                         WarpHandler.DesertWarp = null;
                         ev.Player.setTileLocation(new Vector2(to.X, to.Y));
-                    } else if (ModEntry.config.PatchObelisks && point == ev.Player.getTileLocationPoint())
+                    }
+                    else if (ModEntry.config.PatchObelisks && point == ev.Player.getTileLocationPoint())
                     {
                         Dictionary<string, WarpLocation> dests = Utils.GetWarpLocations();
                         if (dests.ContainsKey("desert"))

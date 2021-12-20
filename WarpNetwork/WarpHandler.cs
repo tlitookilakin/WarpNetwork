@@ -7,7 +7,6 @@ using StardewValley.Network;
 using System;
 using System.Collections.Generic;
 using WarpNetwork.models;
-using WarpNetwork.api;
 
 namespace WarpNetwork
 {
@@ -42,32 +41,34 @@ namespace WarpNetwork
                 string normid = id.ToLower();
                 if (
                     !loc.AlwaysHide && (
-                    normalized == "_force" || 
-                    (loc.Enabled && normid != normalized) || 
+                    normalized == "_force" ||
+                    (loc.Enabled && normid != normalized) ||
                     (normid == "farm" && normalized == "_wand")
                     )
                 )
                 {
-                    if(Game1.getLocationFromName(loc.Location) != null)
+                    if (Game1.getLocationFromName(loc.Location) != null)
                     {
                         dests.Add(locs[id]);
-                    } else
+                    }
+                    else
                     {
-                        ModEntry.monitor.Log("Invalid Location name '"+loc.Location+"'; skipping entry.", LogLevel.Warn);
+                        ModEntry.monitor.Log("Invalid Location name '" + loc.Location + "'; skipping entry.", LogLevel.Warn);
                     }
                 }
             }
-            if(dests.Count == 0)
+            if (dests.Count == 0)
             {
                 ModEntry.monitor.Log("No valid warp destinations, menu not displayed.");
                 ShowFailureText();
                 return;
             }
             Item stack = consume ? Game1.player.CurrentItem : null;
-            Game1.activeClickableMenu = new WarpMenu(dests, (WarpLocation where) => {
+            Game1.activeClickableMenu = new WarpMenu(dests, (WarpLocation where) =>
+            {
                 WarpToLocation(where, normalized == "_wand");
                 Utils.reduceItemCount(Game1.player, stack, 1);
-                });
+            });
         }
         private static void ShowFailureText()
         {
@@ -103,7 +104,7 @@ namespace WarpNetwork
         }
         public static bool DirectWarp(string location, bool force)
         {
-            if(location is null)
+            if (location is null)
             {
                 ModEntry.monitor.Log("Destination is null! Cannot warp!", LogLevel.Error);
                 ShowFailureText();
@@ -127,7 +128,8 @@ namespace WarpNetwork
                             ShowFailureText();
                             return false;
                         }
-                    } else
+                    }
+                    else
                     {
                         ModEntry.monitor.Log("Failed to warp to '" + loc.Location + "': Festival at location not ready.", LogLevel.Debug);
                         ShowFailureText();
@@ -150,7 +152,7 @@ namespace WarpNetwork
         }
         internal static void WarpToLocation(WarpLocation where, bool fromWand = false)
         {
-            if(where is CustomWarpLocation custom)
+            if (where is CustomWarpLocation custom)
             {
                 custom.handler.Warp();
                 return;
@@ -159,7 +161,7 @@ namespace WarpNetwork
             int y = where.Y;
             if (where.Location == "Farm")
             {
-                if(fromWand)
+                if (fromWand)
                 {
                     Point dest = GetFrontDoor(Game1.player);
                     DoWarpEffects(() => Game1.warpFarmer("Farm", dest.X, dest.Y, false));
@@ -169,13 +171,14 @@ namespace WarpNetwork
                 x = farmTotem.X;
                 y = farmTotem.Y;
             }
-            if(where.Location == "Desert")
+            if (where.Location == "Desert")
             {
                 //desert has bus scene hardcoded. Must warp to hardcoded spot, then use obelisk patch to move the player afterwards.
                 if (!where.OverrideMapProperty)
                 {
                     DesertWarp = Game1.getLocationFromName("Desert").GetMapPropertyPosition("WarpNetworkEntry", where.X, where.Y);
-                } else
+                }
+                else
                 {
                     DesertWarp = new Point(where.X, where.Y);
                 }
@@ -185,7 +188,8 @@ namespace WarpNetwork
             {
                 Point coords = Game1.getLocationFromName(where.Location).GetMapPropertyPosition("WarpNetworkEntry", x, y);
                 DoWarpEffects(() => Game1.warpFarmer(where.Location, coords.X, coords.Y, false));
-            } else
+            }
+            else
             {
                 DoWarpEffects(() => Game1.warpFarmer(where.Location, x, y, false));
             }
@@ -193,7 +197,7 @@ namespace WarpNetwork
         private static Point GetFrontDoor(Farmer who)
         {
             FarmHouse home = Utility.getHomeOfFarmer(who);
-            if(!(home is null))
+            if (!(home is null))
             {
                 return home.getFrontDoorSpot();
             }
@@ -219,7 +223,8 @@ namespace WarpNetwork
             who.temporaryInvincibilityTimer = -2000;
             who.freezePause = 1000;
             Game1.flashAlpha = 1f;
-            DelayedAction.fadeAfterDelay(new Game1.afterFadeFunction(() => {
+            DelayedAction.fadeAfterDelay(new Game1.afterFadeFunction(() =>
+            {
                 action();
                 Game1.fadeToBlackAlpha = 0.99f;
                 Game1.screenGlow = false;

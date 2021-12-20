@@ -40,11 +40,11 @@ namespace WarpNetwork
             api.RegisterLabel(manifest, manifest.Name, manifest.Description);
 
             api.RegisterChoiceOption(
-                manifest, 
-                helper.Translation.Get("cfg-warpsenabled.label"), 
-                helper.Translation.Get("cfg-warpsenabled.desc"), 
-                () => VanillaWarpsEnabled.ToString(), 
-                (string c) => VanillaWarpsEnabled = Utils.ParseEnum<WarpEnabled>(c), 
+                manifest,
+                helper.Translation.Get("cfg-warpsenabled.label"),
+                helper.Translation.Get("cfg-warpsenabled.desc"),
+                () => VanillaWarpsEnabled.ToString(),
+                (string c) => VanillaWarpsEnabled = Utils.ParseEnum<WarpEnabled>(c),
                 Enum.GetNames(typeof(WarpEnabled))
             );
             api.RegisterChoiceOption(

@@ -13,7 +13,8 @@ namespace WarpNetwork.models
         {
             get { return handler.GetLabel(); }
         }
-        public override string Icon { 
+        public override string Icon
+        {
             get { return handler.GetIconName(); }
         }
         public override bool Enabled

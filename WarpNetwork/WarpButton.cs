@@ -25,7 +25,7 @@ namespace WarpNetwork
         }
         public int index = 0;
         private WarpLocation loc;
-        private static readonly Rectangle bg = new Rectangle(384, 396, 15, 15);
+        private static readonly Rectangle bg = new(384, 396, 15, 15);
         private string text = "Unnamed";
         private Vector2 textSize;
 
@@ -43,13 +43,14 @@ namespace WarpNetwork
         {
             if (loc == null)
                 return;
-            if(containsPoint(Game1.getOldMouseX(), Game1.getOldMouseY()))
+            if (containsPoint(Game1.getOldMouseX(), Game1.getOldMouseY()))
             {
                 tint = Color.Wheat;
                 if (!wasHovered)
                     Game1.playSound("shiny4");
                 wasHovered = true;
-            } else
+            }
+            else
             {
                 tint = Color.White;
                 wasHovered = false;
