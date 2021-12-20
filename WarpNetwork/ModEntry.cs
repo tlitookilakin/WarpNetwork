@@ -6,15 +6,16 @@ using System.IO;
 using WarpNetwork.api;
 using WarpNetwork.models;
 using Microsoft.Xna.Framework.Graphics;
+using StardewModdingAPI.Utilities;
 
 namespace WarpNetwork
 {
     class ModEntry : Mod, IAssetLoader
     {
         //const
-        public static readonly string pathLocData = "Data/WarpNetwork/Destinations";
-        public static readonly string pathItemData = "Data/WarpNetwork/WarpItems";
-        public static readonly string pathIcons = "Data/WarpNetwork/Icons/";
+        public static readonly string pathLocData = PathUtilities.NormalizeAssetName("Data/WarpNetwork/Destinations");
+        public static readonly string pathItemData = PathUtilities.NormalizeAssetName("Data/WarpNetwork/WarpItems");
+        public static readonly string pathIcons = PathUtilities.NormalizeAssetName("Data/WarpNetwork/Icons/");
 
         //main
         internal static Config config;

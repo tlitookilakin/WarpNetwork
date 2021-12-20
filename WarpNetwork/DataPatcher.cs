@@ -10,6 +10,7 @@ using xTile.Dimensions;
 using xTile.Layers;
 using xTile.Tiles;
 using WarpNetwork.models;
+using StardewModdingAPI.Utilities;
 
 namespace WarpNetwork
 {
@@ -41,8 +42,13 @@ namespace WarpNetwork
             {
                 if (ModEntry.config.MenuEnabled)
                 {
-                    string Name = Path.GetFileNameWithoutExtension(asset.AssetName);
-                    Name = (Name == "Island_S") ? "island" : Name.StartsWith("Maps/Beach") ? "beach" : Name.ToLower();
+                    string Name = PathUtilities.NormalizeAssetName(asset.AssetName);
+                    if(asset.DataType != typeof(Map))
+                    {
+                        ModEntry.monitor.Log("Expected vanilla asset '"+asset.AssetName+"' to be a map, but instead got type '" + asset.DataType.FullName + "'!", LogLevel.Error);
+                        return;
+                    }
+                    Name = (Name == "Island_S") ? "island" : Name.StartsWith(PathUtilities.NormalizeAssetName("Maps/Beach")) ? "beach" : Name.ToLower();
                     AddVanillaWarpStatue(asset.AsMap(), Name);
                 }
             }
