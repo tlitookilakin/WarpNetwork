@@ -34,11 +34,11 @@ namespace WarpNetwork
             helper.Events.Input.ButtonPressed += ItemHandler.ButtonPressed;
             helper.Events.Player.Warped += ObeliskPatch.MoveAfterWarp;
             SpaceEvents.ActionActivated += WarpHandler.HandleAction;
-            if (helper.ModRegistry.IsLoaded("spacechase0.DynamicGameAssets"))
-                dgaAPI = helper.ModRegistry.GetApi<IDynamicGameAssets>("spacechase0.DynamicGameAssets");
         }
         public void GameLaunched(object sender, GameLaunchedEventArgs ev)
         {
+            if (helper.ModRegistry.IsLoaded("spacechase0.DynamicGameAssets"))
+                dgaAPI = helper.ModRegistry.GetApi<IDynamicGameAssets>("spacechase0.DynamicGameAssets");
             config.RegisterModConfigMenu(Helper, ModManifest);
             CPIntegration.AddTokens(ModManifest);
         }
@@ -62,8 +62,6 @@ namespace WarpNetwork
         }
         public T Load<T>(IAssetInfo asset)
         {
-            monitor.Log(asset.AssetName);
-            monitor.Log(pathIcons);
             if (asset.AssetNameEquals(pathItemData))
             {
                 Dictionary<string, WarpItem> items = Helper.Content.Load<Dictionary<string, WarpItem>>(Path.Combine("assets", "WarpItems.json"));

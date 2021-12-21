@@ -1,6 +1,6 @@
 ﻿namespace WarpNetwork.api
 {
-    interface IDynamicGameAssets
+    public interface IDynamicGameAssets
     {
         string GetDGAItemId(object item);
     }
