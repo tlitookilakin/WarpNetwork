@@ -11,7 +11,7 @@ namespace WarpNetwork
 {
     class WarpMenu : IClickableMenu
     {
-        const int buttonH = 63;
+        const int buttonH =72;
 
         private readonly Rectangle panel = new(384, 373, 18, 18);
         private readonly List<WarpLocation> locs;
@@ -32,7 +32,7 @@ namespace WarpNetwork
         {
             autoAlign = x == 0 && y == 0;
             this.width = width != 0 ? width : 600;
-            this.height = height != 0 ? height : 350;
+            this.height = height != 0 ? height : 380;
             this.callback = callback;
             this.locs = locs;
             if (locs.Count < 1)
