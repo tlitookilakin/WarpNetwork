@@ -47,7 +47,7 @@ namespace WarpNetwork
                     )
                 )
                 {
-                    if (Game1.getLocationFromName(loc.Location) != null)
+                    if (loc is CustomWarpLocation || Game1.getLocationFromName(loc.Location) != null)
                     {
                         dests.Add(locs[id]);
                     }
