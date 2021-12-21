@@ -18,8 +18,8 @@ namespace WarpNetwork
     {
         private static readonly string[] DefaultDests = { "farm", "mountain", "beach", "desert", "island" };
 
-        public static Dictionary<string, WarpLocation> ApiLocs = new Dictionary<string, WarpLocation>(StringComparer.OrdinalIgnoreCase);
-        public static Dictionary<string, WarpItem> ApiItems = new Dictionary<string, WarpItem>(StringComparer.OrdinalIgnoreCase);
+        public static Dictionary<string, WarpLocation> ApiLocs = new(StringComparer.OrdinalIgnoreCase);
+        public static Dictionary<string, WarpItem> ApiItems = new(StringComparer.OrdinalIgnoreCase);
 
         public bool CanEdit<T>(IAssetInfo asset)
         {
@@ -42,7 +42,7 @@ namespace WarpNetwork
             {
                 if (ModEntry.config.MenuEnabled)
                 {
-                    string Name = PathUtilities.NormalizeAssetName(asset.AssetName);
+                    string Name = asset.AssetName;
                     if (asset.DataType != typeof(Map))
                     {
                         ModEntry.monitor.Log("Expected vanilla asset '" + asset.AssetName + "' to be a map, but instead got type '" + asset.DataType.FullName + "'!", LogLevel.Error);
