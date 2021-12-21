@@ -42,13 +42,13 @@ namespace WarpNetwork
             {
                 if (ModEntry.config.MenuEnabled)
                 {
-                    string Name = asset.AssetName;
+                    string Name = asset.AssetName.Split(PathUtilities.PreferredAssetSeparator)[1];
                     if (asset.DataType != typeof(Map))
                     {
                         ModEntry.monitor.Log("Expected vanilla asset '" + asset.AssetName + "' to be a map, but instead got type '" + asset.DataType.FullName + "'!", LogLevel.Error);
                         return;
                     }
-                    Name = (Name == "Island_S") ? "island" : Name.StartsWith(PathUtilities.NormalizeAssetName("Maps/Beach")) ? "beach" : Name.ToLower();
+                    Name = (Name == "Island_S") ? "island" : Name.StartsWith("Beach") ? "beach" : Name.ToLower();
                     AddVanillaWarpStatue(asset.AsMap(), Name);
                 }
             }

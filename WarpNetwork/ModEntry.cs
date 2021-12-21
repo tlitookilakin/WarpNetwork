@@ -15,7 +15,7 @@ namespace WarpNetwork
         //const
         public static readonly string pathLocData = PathUtilities.NormalizeAssetName("Data/WarpNetwork/Destinations");
         public static readonly string pathItemData = PathUtilities.NormalizeAssetName("Data/WarpNetwork/WarpItems");
-        public static readonly string pathIcons = PathUtilities.NormalizeAssetName("Data/WarpNetwork/Icons/");
+        public static readonly string pathIcons = PathUtilities.NormalizeAssetName("Data/WarpNetwork/Icons");
 
         //main
         internal static Config config;
@@ -52,16 +52,18 @@ namespace WarpNetwork
             return (
                 asset.AssetNameEquals(pathLocData) ||
                 asset.AssetNameEquals(pathItemData) ||
-                asset.AssetNameEquals(pathIcons + "DEFAULT") ||
-                asset.AssetNameEquals(pathIcons + "farm") ||
-                asset.AssetNameEquals(pathIcons + "mountain") ||
-                asset.AssetNameEquals(pathIcons + "island") ||
-                asset.AssetNameEquals(pathIcons + "desert") ||
-                asset.AssetNameEquals(pathIcons + "beach")
+                asset.AssetNameEquals(pathIcons + "/DEFAULT") ||
+                asset.AssetNameEquals(pathIcons + "/farm") ||
+                asset.AssetNameEquals(pathIcons + "/mountain") ||
+                asset.AssetNameEquals(pathIcons + "/island") ||
+                asset.AssetNameEquals(pathIcons + "/desert") ||
+                asset.AssetNameEquals(pathIcons + "/beach")
             );
         }
         public T Load<T>(IAssetInfo asset)
         {
+            monitor.Log(asset.AssetName);
+            monitor.Log(pathIcons);
             if (asset.AssetNameEquals(pathItemData))
             {
                 Dictionary<string, WarpItem> items = Helper.Content.Load<Dictionary<string, WarpItem>>(Path.Combine("assets", "WarpItems.json"));
@@ -78,7 +80,7 @@ namespace WarpNetwork
             }
             else if (asset.AssetName.StartsWith(pathIcons))
             {
-                return (T)(object)Helper.Content.Load<Texture2D>(Path.Combine("assets", "icons", asset.AssetName.Remove(0, pathIcons.Length) + ".png"));
+                return (T)(object)Helper.Content.Load<Texture2D>(Path.Combine("assets", "icons", asset.AssetName.Split(PathUtilities.PreferredAssetSeparator)[3] + ".png"));
             }
             return default;
         }
