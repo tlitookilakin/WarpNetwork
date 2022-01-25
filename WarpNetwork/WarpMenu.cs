@@ -167,9 +167,9 @@ namespace WarpNetwork
         }
         public void align()
         {
-            Point port = Game1.graphics.GraphicsDevice.Viewport.Bounds.Size;
-            xPositionOnScreen = (int)((port.X / 2 - width / 2) / Game1.options.uiScale);
-            yPositionOnScreen = (int)((port.Y / 2 - height / 2) / Game1.options.uiScale);
+            var port = Game1.uiViewport.Size;
+            xPositionOnScreen = port.Width / 2 - width / 2;
+            yPositionOnScreen = port.Height / 2 - height / 2;
         }
         public void resized()
         {
