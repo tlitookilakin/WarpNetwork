@@ -22,16 +22,7 @@ namespace WarpNetwork.models
             get
             {
                 if (cachedIcon == null)
-                {
-                    try
-                    {
-                        cachedIcon = ModEntry.helper.GameContent.Load<Texture2D>("Data/WarpNetwork/Icons/" + Icon);
-                    }
-                    catch (ContentLoadException)
-                    {
-                        cachedIcon = ModEntry.helper.GameContent.Load<Texture2D>("Data/WarpNetwork/Icons/DEFAULT");
-                    }
-                }
+                    cachedIcon = ModEntry.helper.GameContent.Load<Texture2D>("Data/WarpNetwork/Icons/" + Icon);
                 return cachedIcon;
             }
         }

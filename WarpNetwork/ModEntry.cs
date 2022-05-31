@@ -32,6 +32,7 @@ namespace WarpNetwork
             i18n = helper.Translation;
             helper.ConsoleCommands.Add("warpnet", "Master command for Warp Network mod. Use 'warpnet' or 'warpnet help' to see a list of subcommands.", CommandHandler.Main);
             helper.Events.Content.AssetRequested += DataPatcher.AssetRequested;
+            helper.Events.Content.AssetRequested += LoadAssets;
             helper.Events.GameLoop.GameLaunched += GameLaunched;
             helper.Events.Input.ButtonPressed += ItemHandler.ButtonPressed;
             helper.Events.Player.Warped += ObeliskPatch.MoveAfterWarp;
