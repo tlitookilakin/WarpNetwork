@@ -25,20 +25,17 @@ namespace WarpNetwork.models
                 {
                     try
                     {
-                        cachedIcon = ModEntry.helper.Content.Load<Texture2D>("Data/WarpNetwork/Icons/" + Icon, ContentSource.GameContent);
+                        cachedIcon = ModEntry.helper.GameContent.Load<Texture2D>("Data/WarpNetwork/Icons/" + Icon);
                     }
                     catch (ContentLoadException)
                     {
-                        cachedIcon = ModEntry.helper.Content.Load<Texture2D>("Data/WarpNetwork/Icons/DEFAULT", ContentSource.GameContent);
+                        cachedIcon = ModEntry.helper.GameContent.Load<Texture2D>("Data/WarpNetwork/Icons/DEFAULT");
                     }
                 }
                 return cachedIcon;
             }
         }
 
-        public Location CoordsAsLocation()
-        {
-            return new Location(X, Y);
-        }
+        public Location CoordsAsLocation() => new Location(X, Y);
     }
 }

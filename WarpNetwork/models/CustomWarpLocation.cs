@@ -11,15 +11,15 @@ namespace WarpNetwork.models
         }
         public override string Label
         {
-            get { return handler.GetLabel(); }
+            get => handler.GetLabel();
         }
         public override string Icon
         {
-            get { return handler.GetIconName(); }
+            get => handler.GetIconName();
         }
         public override bool Enabled
         {
-            get { return handler.GetEnabled(); }
+            get => handler.GetEnabled();
         }
     }
 }
