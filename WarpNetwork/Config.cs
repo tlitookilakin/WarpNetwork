@@ -30,6 +30,8 @@ namespace WarpNetwork
             AccessFromWand = false;
             PatchObelisks = true;
             MenuEnabled = true;
+            WarpCancelEnabled = false;
+            WandReturnEnabled = true;
         }
         public void RegisterModConfigMenu(IManifest manifest)
         {
