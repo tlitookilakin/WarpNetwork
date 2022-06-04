@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Network;
 using StardewValley.Objects;
@@ -13,6 +14,8 @@ namespace WarpNetwork
 {
     class ItemHandler
     {
+        private static readonly PerScreen<WarpItem> currentTotem = new();
+        private static readonly PerScreen<string> currentID = new();
         public static void ButtonPressed(object sender, ButtonPressedEventArgs action)
         {
             if (action.IsSuppressed())
@@ -24,7 +27,7 @@ namespace WarpNetwork
             {
                 if (CanUseHere(who))
                 {
-                    if (who.ActiveObject != null && !(who.ActiveObject is Furniture))
+                    if (who.ActiveObject is not Furniture and not null)
                     {
                         if (!who.canMove || who.ActiveObject.isTemporarilyInvisible)
                         {
@@ -63,15 +66,35 @@ namespace WarpNetwork
             {
                 WarpItem item = items[id];
                 if (item.Destination.ToLower() == "_all")
-                {
                     WarpHandler.ShowWarpMenu("", item.Consume);
-                    return true;
-                }
-                Color color = Utils.ParseColor(item.Color);
-                DoTotemWarpEffects(color, id, item.Consume, who, (f) => WarpHandler.DirectWarp(item.Destination, item.IgnoreDisabled));
+                else if (ModEntry.config.WarpCancelEnabled)
+                    RequestUseItem(item, id);
+                else
+                    ConfirmUseItem(item, who, id);
                 return true;
             }
             return false;
+        }
+        private static void RequestUseItem(WarpItem item, string id)
+        {
+            currentTotem.Value = item;
+            currentID.Value = id;
+            if (Utils.GetWarpLocations().TryGetValue(item.Destination, out var dest))
+                Game1.currentLocation.createQuestionDialogue(ModEntry.i18n.Get("ui-usetotem", dest), Game1.currentLocation.createYesNoResponses(), AnswerRequest);
+            else
+                ModEntry.monitor.Log($"Totem could not warp to '{item.Destination}', destination is not defined and does not exist!", LogLevel.Warn);
+        }
+        private static void AnswerRequest(Farmer who, string key)
+        {
+            if (key=="Yes")
+                ConfirmUseItem(currentTotem.Value, who, currentID.Value);
+            currentTotem.Value = null;
+            currentID.Value = null;
+        }
+        private static void ConfirmUseItem(WarpItem item, Farmer who, string id)
+        {
+            Color color = Utils.ParseColor(item.Color);
+            DoTotemWarpEffects(color, id, item.Consume, who, (f) => WarpHandler.DirectWarp(item.Destination, item.IgnoreDisabled));
         }
         private static bool CanUseHere(Farmer who)
         {

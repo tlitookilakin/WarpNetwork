@@ -55,7 +55,7 @@ namespace WarpNetwork
             foreach (string key in DefaultDests)
                 if (dict.ContainsKey(key))
                 {
-                    Translation label = ModEntry.helper.Translation.Get("dest-" + key);
+                    Translation label = ModEntry.i18n.Get("dest-" + key);
                     if (label.HasValue())
                         dict[key].Label = label;
                 }

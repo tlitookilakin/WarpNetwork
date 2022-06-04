@@ -19,6 +19,8 @@ namespace WarpNetwork
         public bool AccessFromWand { get; set; }
         public bool PatchObelisks { get; set; }
         public bool MenuEnabled { get; set; }
+        public bool WarpCancelEnabled { get; set; }
+        public bool WandReturnEnabled { get; set; }
 
         public void ResetToDefault()
         {
@@ -81,6 +83,20 @@ namespace WarpNetwork
                 (bool b) => MenuEnabled = b,
                 () => ModEntry.i18n.Get("cfg-menu.label"),
                 () => ModEntry.i18n.Get("cfg-menu.desc")
+            );
+            api.AddBoolOption(
+                manifest,
+                () => WarpCancelEnabled,
+                (bool b) => WarpCancelEnabled = b,
+                () => ModEntry.i18n.Get("cfg-warpcancel.label"),
+                () => ModEntry.i18n.Get("cfg-warpcancel.desc")
+            );
+            api.AddBoolOption(
+                manifest,
+                () => WandReturnEnabled,
+                (bool b) => WandReturnEnabled = b,
+                () => ModEntry.i18n.Get("cfg-wandreturn.label"),
+                () => ModEntry.i18n.Get("cfg-wandreturn.desc")
             );
         }
         internal string AsText()

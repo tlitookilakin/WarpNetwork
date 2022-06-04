@@ -9,17 +9,8 @@ namespace WarpNetwork.models
         {
             this.handler = handler;
         }
-        public override string Label
-        {
-            get => handler.GetLabel();
-        }
-        public override string Icon
-        {
-            get => handler.GetIconName();
-        }
-        public override bool Enabled
-        {
-            get => handler.GetEnabled();
-        }
+        public override string Label => handler.GetLabel();
+        public override string Icon => handler.GetIconName();
+        public override bool Enabled => handler.GetEnabled();
     }
 }

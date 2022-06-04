@@ -1,11 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using SpaceCore.Events;
 using StardewModdingAPI;
+using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.Network;
 using System;
 using System.Collections.Generic;
+using WarpNetwork.api;
 using WarpNetwork.models;
 
 namespace WarpNetwork
@@ -13,6 +15,9 @@ namespace WarpNetwork
     class WarpHandler
     {
         internal static Point? DesertWarp = null;
+        internal static readonly PerScreen<string> wandLocation = new();
+        internal static readonly PerScreen<Point> wandTile = new();
+        private static readonly WarpNetHandler returnHandler = new(() => wandLocation is not null, () => "RETURN", () => ModEntry.i18n.Get("dest-return"), ReturnToPrev);
         public static void ShowWarpMenu(string exclude = "", bool consume = false)
         {
             if (!ModEntry.config.MenuEnabled)
@@ -34,11 +39,16 @@ namespace WarpNetwork
                     return;
                 }
             }
-            string normalized = exclude.ToLower();
-            foreach (string id in locs.Keys)
+            string normalized = exclude.ToLowerInvariant();
+            if (normalized == "_wand" && ModEntry.config.WandReturnEnabled && wandLocation is not null)
             {
-                WarpLocation loc = locs[id];
-                string normid = id.ToLower();
+                var dest = Game1.getLocationFromName(wandLocation.Value);
+                if (dest is not null)
+                    dests.Add(new CustomWarpLocation(returnHandler));
+            }
+            foreach ((string id, WarpLocation loc) in locs)
+            {
+                string normid = id.ToLowerInvariant();
                 if (
                     !loc.AlwaysHide && (
                     normalized == "_force" ||
@@ -48,13 +58,9 @@ namespace WarpNetwork
                 )
                 {
                     if (loc is CustomWarpLocation || Game1.getLocationFromName(loc.Location) != null)
-                    {
                         dests.Add(locs[id]);
-                    }
                     else
-                    {
                         ModEntry.monitor.Log("Invalid Location name '" + loc.Location + "'; skipping entry.", LogLevel.Warn);
-                    }
                 }
             }
             if (dests.Count == 0)
@@ -73,6 +79,13 @@ namespace WarpNetwork
         private static void ShowFailureText()
         {
             Game1.drawObjectDialogue(Game1.parseText(ModEntry.helper.Translation.Get("ui-fail")));
+        }
+        private static void ReturnToPrev()
+        {
+            (int x, int y) = wandTile.Value;
+            string loc = wandLocation.Value;
+            //MUST copy to preserve. warp is called on delay and values may change.
+            DoWarpEffects(() => Game1.warpFarmer(loc, x, y, false));
         }
         public static void HandleAction(object sender, EventArgsAction action)
         {
@@ -155,7 +168,14 @@ namespace WarpNetwork
             if (where is CustomWarpLocation custom)
             {
                 custom.handler.Warp();
+                if (custom.handler == returnHandler)
+                    wandLocation.Value = null;
                 return;
+            }
+            if (fromWand && Game1.currentLocation.Name != "Temp")
+            {
+                wandLocation.Value = Game1.currentLocation.NameOrUniqueName;
+                wandTile.Value = Game1.player.getTileLocationPoint();
             }
             int x = where.X;
             int y = where.Y;
@@ -226,10 +246,7 @@ namespace WarpNetwork
             DelayedAction.fadeAfterDelay(new Game1.afterFadeFunction(() =>
             {
                 action();
-                if (!Game1.isStartingToGetDarkOut() && !Game1.isRaining)
-                    Game1.playMorningSong();
-                else
-                    Game1.changeMusicTrack("none");
+                Game1.changeMusicTrack("none");
                 Game1.fadeToBlackAlpha = 0.99f;
                 Game1.screenGlow = false;
                 Game1.player.temporarilyInvincible = false;
