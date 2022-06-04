@@ -17,7 +17,7 @@ namespace WarpNetwork
         internal static Point? DesertWarp = null;
         internal static readonly PerScreen<string> wandLocation = new();
         internal static readonly PerScreen<Point> wandTile = new();
-        private static readonly WarpNetHandler returnHandler = new(() => wandLocation is not null, () => "RETURN", () => ModEntry.i18n.Get("dest-return"), ReturnToPrev);
+        private static readonly WarpNetHandler returnHandler = new(() => wandLocation.Value is not null, () => "RETURN", () => ModEntry.i18n.Get("dest-return"), ReturnToPrev);
         public static void ShowWarpMenu(string exclude = "", bool consume = false)
         {
             if (!ModEntry.config.MenuEnabled)
@@ -40,7 +40,7 @@ namespace WarpNetwork
                 }
             }
             string normalized = exclude.ToLowerInvariant();
-            if (normalized == "_wand" && ModEntry.config.WandReturnEnabled && wandLocation is not null)
+            if (normalized == "_wand" && ModEntry.config.WandReturnEnabled && wandLocation.Value is not null)
             {
                 var dest = Game1.getLocationFromName(wandLocation.Value);
                 if (dest is not null)
@@ -76,9 +76,13 @@ namespace WarpNetwork
                 Utils.reduceItemCount(Game1.player, stack, 1);
             });
         }
-        private static void ShowFailureText()
+        internal static void ShowFailureText()
         {
-            Game1.drawObjectDialogue(Game1.parseText(ModEntry.helper.Translation.Get("ui-fail")));
+            Game1.drawObjectDialogue(Game1.parseText(ModEntry.i18n.Get("ui-fail")));
+        }
+        internal static void ShowFestivalNotReady()
+        {
+            Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\StringsFromCSFiles:Game1.cs.2973"));
         }
         private static void ReturnToPrev()
         {
@@ -123,11 +127,19 @@ namespace WarpNetwork
                 ShowFailureText();
                 return false;
             }
-            Dictionary<String, WarpLocation> locs = Utils.GetWarpLocations();
+            if (location.ToLowerInvariant() == "_return")
+            {
+                if (returnHandler.getEnabled())
+                    returnHandler.Warp();
+                else
+                    return false;
+                return true;
+            }
+            Dictionary<string, WarpLocation> locs = Utils.GetWarpLocations();
             WarpLocation loc = locs[location];
             if (locs.ContainsKey(location))
             {
-                if (!(Game1.getLocationFromName(loc.Location) is null))
+                if (Game1.getLocationFromName(loc.Location) is not null)
                 {
                     if (!Utils.IsFestivalAtLocation(loc.Location) || Utils.IsFestivalReady())
                     {
@@ -145,7 +157,7 @@ namespace WarpNetwork
                     else
                     {
                         ModEntry.monitor.Log("Failed to warp to '" + loc.Location + "': Festival at location not ready.", LogLevel.Debug);
-                        ShowFailureText();
+                        ShowFestivalNotReady();
                         return false;
                     }
                 }
@@ -172,7 +184,7 @@ namespace WarpNetwork
                     wandLocation.Value = null;
                 return;
             }
-            if (fromWand && Game1.currentLocation.Name != "Temp")
+            if (Game1.currentLocation.Name != "Temp")
             {
                 wandLocation.Value = Game1.currentLocation.NameOrUniqueName;
                 wandTile.Value = Game1.player.getTileLocationPoint();

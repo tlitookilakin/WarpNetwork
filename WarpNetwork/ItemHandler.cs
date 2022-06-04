@@ -79,7 +79,12 @@ namespace WarpNetwork
         {
             currentTotem.Value = item;
             currentID.Value = id;
-            if (Utils.GetWarpLocations().TryGetValue(item.Destination, out var dest))
+            if (item.Destination.ToLowerInvariant() == "_return")
+                if (WarpHandler.wandLocation.Value is not null)
+                    Game1.currentLocation.createQuestionDialogue(ModEntry.i18n.Get("ui-usereturn"), Game1.currentLocation.createYesNoResponses(), AnswerRequest);
+                else
+                    WarpHandler.ShowFailureText();
+            else if (Utils.GetWarpLocations().TryGetValue(item.Destination, out var dest))
                 Game1.currentLocation.createQuestionDialogue(ModEntry.i18n.Get("ui-usetotem", dest), Game1.currentLocation.createYesNoResponses(), AnswerRequest);
             else
                 ModEntry.monitor.Log($"Totem could not warp to '{item.Destination}', destination is not defined and does not exist!", LogLevel.Warn);

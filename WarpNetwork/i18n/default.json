@@ -3,6 +3,7 @@
   "ui-label": "Choose Destination",
   "ui-cancel": "Cancel",
   "ui-usetotem": "Warp to {{Label}}?",
+  "ui-usereturn": "Return to last location?",
   "cfg-warpsenabled.label": "Vanilla Warps Enabled",
   "cfg-warpsenabled.desc": "When to enable the vanilla warps.",
   "cfg-farmenabled.label": "Farm Warp Enabled",
