@@ -37,6 +37,12 @@ namespace WarpNetwork
             helper.Events.Input.ButtonPressed += ItemHandler.ButtonPressed;
             helper.Events.Player.Warped += ObeliskPatch.MoveAfterWarp;
             SpaceEvents.ActionActivated += WarpHandler.HandleAction;
+            helper.Events.World.BuildingListChanged += updateBuildingList;
+        }
+        public void updateBuildingList(object sender, BuildingListChangedEventArgs ev)
+        {
+            if (config.ObeliskCheckRequired())
+                helper.GameContent.InvalidateCache(pathLocData);
         }
         public void GameLaunched(object sender, GameLaunchedEventArgs ev)
         {
