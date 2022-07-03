@@ -50,11 +50,8 @@ namespace WarpNetwork
                         {
                             Dictionary<string, WarpLocation> dests = Utils.GetWarpLocations();
                             string target = (Name == "IslandSouth") ? "island" : Name;
-                            Point to;
-                            if (dests.TryGetValue(target, out var dest) && dest.OverrideMapProperty)
-                                to = new(dest.X, dest.Y);
-                            else
-                                to = ev.NewLocation.GetMapPropertyPosition("WarpNetworkEntry", point.X, point.Y);
+                            Point to = (dests.TryGetValue(target, out var dest) && dest.OverrideMapProperty) ?
+                                new(dest.X, dest.Y) : ev.NewLocation.GetMapPropertyPosition("WarpNetworkEntry", point.X, point.Y);
                             ev.Player.setTileLocation(new Vector2(to.X, to.Y));
                         }
                     }
