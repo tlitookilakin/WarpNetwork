@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using AeroCore;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
@@ -15,12 +16,18 @@ using xTile.Tiles;
 
 namespace WarpNetwork
 {
+    [ModInit]
     class DataPatcher
     {
         private static readonly string[] DefaultDests = { "farm", "mountain", "beach", "desert", "island" };
 
         public static Dictionary<string, WarpLocation> ApiLocs = new(StringComparer.OrdinalIgnoreCase);
         public static Dictionary<string, WarpItem> ApiItems = new(StringComparer.OrdinalIgnoreCase);
+
+        internal static void Init()
+        {
+            ModEntry.helper.Events.Content.AssetRequested += AssetRequested;
+        }
 
         internal static void AssetRequested(object _, AssetRequestedEventArgs ev)
         {

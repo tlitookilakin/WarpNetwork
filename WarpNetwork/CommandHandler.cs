@@ -1,4 +1,5 @@
-﻿using StardewModdingAPI;
+﻿using AeroCore;
+using StardewModdingAPI;
 using StardewValley;
 using System;
 using System.Collections.Generic;
@@ -8,8 +9,16 @@ using WarpNetwork.models;
 
 namespace WarpNetwork
 {
+    [ModInit]
     class CommandHandler
     {
+        internal static void Init()
+        {
+            ModEntry.helper.ConsoleCommands.Add(
+                "warpnet", 
+                "Master command for Warp Network mod. Use 'warpnet' or 'warpnet help' to see a list of subcommands.", 
+                Main);
+        }
 
         private static readonly Dictionary<string, string> CmdDescs = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase)
         {

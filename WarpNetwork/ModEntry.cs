@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using SpaceCore.Events;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
@@ -21,8 +20,8 @@ namespace WarpNetwork
         internal static Config config;
         internal static IModHelper helper;
         internal static IMonitor monitor;
-        internal static IDynamicGameAssets dgaAPI = null;
         internal static ITranslationHelper i18n;
+        internal static AeroCore.API.IAeroCoreAPI AeroAPI;
         public static API api = new();
         public override void Entry(IModHelper helper)
         {
@@ -30,13 +29,9 @@ namespace WarpNetwork
             ModEntry.helper = helper;
             monitor = Monitor;
             i18n = helper.Translation;
-            helper.ConsoleCommands.Add("warpnet", "Master command for Warp Network mod. Use 'warpnet' or 'warpnet help' to see a list of subcommands.", CommandHandler.Main);
-            helper.Events.Content.AssetRequested += DataPatcher.AssetRequested;
+
             helper.Events.Content.AssetRequested += LoadAssets;
             helper.Events.GameLoop.GameLaunched += GameLaunched;
-            helper.Events.Input.ButtonPressed += ItemHandler.ButtonPressed;
-            helper.Events.Player.Warped += ObeliskPatch.MoveAfterWarp;
-            SpaceEvents.ActionActivated += WarpHandler.HandleAction;
             helper.Events.World.BuildingListChanged += updateBuildingList;
         }
         public void updateBuildingList(object sender, BuildingListChangedEventArgs ev)
@@ -46,9 +41,11 @@ namespace WarpNetwork
         }
         public void GameLaunched(object sender, GameLaunchedEventArgs ev)
         {
-            if (helper.ModRegistry.IsLoaded("spacechase0.DynamicGameAssets"))
-                dgaAPI = helper.ModRegistry.GetApi<IDynamicGameAssets>("spacechase0.DynamicGameAssets");
-            config.RegisterModConfigMenu(ModManifest);
+            AeroAPI = helper.ModRegistry.GetApi<AeroCore.API.IAeroCoreAPI>("tlitookilakin.AeroCore");
+            AeroAPI.RegisterGMCMConfig(ModManifest, helper, config, 
+                () => helper.GameContent.InvalidateCache(pathLocData)
+            );
+            AeroAPI.InitAll();
             CPIntegration.AddTokens(ModManifest);
         }
         public override object GetApi() => api;

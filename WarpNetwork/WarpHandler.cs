@@ -1,5 +1,5 @@
-﻿using Microsoft.Xna.Framework;
-using SpaceCore.Events;
+﻿using AeroCore;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 using StardewValley;
@@ -12,12 +12,19 @@ using WarpNetwork.models;
 
 namespace WarpNetwork
 {
+    [ModInit]
     class WarpHandler
     {
         internal static readonly PerScreen<Point?> DesertWarp = new();
         internal static readonly PerScreen<string> wandLocation = new();
         internal static readonly PerScreen<Point> wandTile = new();
         private static readonly WarpNetHandler returnHandler = new(() => wandLocation.Value is not null, () => "RETURN", () => ModEntry.i18n.Get("dest-return"), ReturnToPrev);
+        
+        internal static void Init()
+        {
+            ModEntry.AeroAPI.RegisterAction("warpnetwork", (w, s, t, g) => ShowWarpMenu(s));
+            ModEntry.AeroAPI.RegisterAction("warpnetworkto", (w, s, t, g) => DirectWarp(s));
+        }
         public static void ShowWarpMenu(string exclude = "", bool consume = false)
         {
             if (!ModEntry.config.MenuEnabled)
@@ -77,13 +84,9 @@ namespace WarpNetwork
             });
         }
         internal static void ShowFailureText()
-        {
-            Game1.drawObjectDialogue(Game1.parseText(ModEntry.i18n.Get("ui-fail")));
-        }
+            => Game1.drawObjectDialogue(Game1.parseText(ModEntry.i18n.Get("ui-fail")));
         internal static void ShowFestivalNotReady()
-        {
-            Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\StringsFromCSFiles:Game1.cs.2973"));
-        }
+            => Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\StringsFromCSFiles:Game1.cs.2973"));
         private static void ReturnToPrev()
         {
             (int x, int y) = wandTile.Value;
@@ -91,23 +94,9 @@ namespace WarpNetwork
             //MUST copy to preserve. warp is called on delay and values may change.
             DoWarpEffects(() => Game1.warpFarmer(loc, x, y, false));
         }
-        public static void HandleAction(object sender, EventArgsAction action)
+        public static bool DirectWarp(string prop)
         {
-            if (action.Action.ToLower() == "warpnetwork")
-            {
-                ModEntry.monitor.Log("Warp Network Activated");
-                string[] args = action.ActionString.Split(' ');
-                ShowWarpMenu((args.Length > 1) ? args[1] : "");
-            }
-            if (action.Action.ToLower() == "warpnetworkto")
-            {
-                ModEntry.monitor.Log("Direct Warp Activated");
-                string[] args = action.ActionString.Split(' ');
-                DirectWarp(args);
-            }
-        }
-        public static bool DirectWarp(string[] args)
-        {
+            var args = prop.Split(' ');
             if (args.Length > 1)
             {
                 bool force = (args.Length > 2);

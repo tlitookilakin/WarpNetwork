@@ -14,8 +14,8 @@
 
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.0.0" />
-	<Reference Include="SpaceCore">
-      <HintPath>..\..\..\libraries\SpaceCore.dll</HintPath>
+	<Reference Include="AeroCore">
+      <HintPath>$(GamePath)\Mods\AeroCore\AeroCore.dll</HintPath>
       <CopyLocal>False</CopyLocal>
       <Private>False</Private>
     </Reference>

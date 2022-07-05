@@ -1,10 +1,10 @@
-﻿using Microsoft.Xna.Framework;
+﻿using AeroCore;
+using AeroCore.API;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
-using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Network;
-using StardewValley.Objects;
 using StardewValley.Tools;
 using System;
 using System.Collections.Generic;
@@ -12,51 +12,33 @@ using WarpNetwork.models;
 
 namespace WarpNetwork
 {
+    [ModInit]
     class ItemHandler
     {
         private static readonly PerScreen<WarpItem> currentTotem = new();
         private static readonly PerScreen<string> currentID = new();
-        public static void ButtonPressed(object sender, ButtonPressedEventArgs action)
+        internal static void Init()
         {
-            if (action.IsSuppressed())
-            {
+            ModEntry.AeroAPI.UseItemEvent += TryUseTotem;
+        }
+        internal static void TryUseTotem(IUseItemEventArgs ev)
+        {
+            if (ev.IsHandled || !ev.NormalGameplay)
                 return;
-            }
-            Farmer who = Game1.player;
-            if (action.Button.IsActionButton())
-            {
-                if (CanUseHere(who))
-                {
-                    if (who.ActiveObject is not Furniture and not null)
-                    {
-                        if (!who.canMove || who.ActiveObject.isTemporarilyInvisible)
-                        {
-                            return;
-                        }
-                        string id = null;
-                        if (ModEntry.dgaAPI != null)
-                        {
-                            id = ModEntry.dgaAPI.GetDGAItemId(who.ActiveObject);
 
-                        }
-                        if (id == null)
-                        {
-                            id = who.ActiveObject.ParentSheetIndex.ToString();
-                        }
-                        if (UseItem(who, id))
-                        {
-                            ModEntry.helper.Input.Suppress(action.Button);
-                        }
-                    }
-                }
-            }
-            else if (action.Button.IsUseToolButton() && who.CurrentTool is Wand && ModEntry.config.AccessFromWand && ModEntry.config.MenuEnabled)
+            // want to manually control when items are used
+            ev.ConsumeItem = false;
+
+            if (ev.IsTool)
             {
-                if (CanUseHere(who) && who.CanMove)
+                if (ev.Item is Wand)
                 {
+                    ev.IsHandled = true;
                     WarpHandler.ShowWarpMenu("_wand");
-                    ModEntry.helper.Input.Suppress(action.Button);
                 }
+            } else
+            {
+                ev.IsHandled = UseItem(Game1.player, ev.ItemStringID);
             }
         }
         private static bool UseItem(Farmer who, string id)
@@ -101,28 +83,10 @@ namespace WarpNetwork
             Color color = Utils.ParseColor(item.Color);
             DoTotemWarpEffects(color, id, item.Consume, who, (f) => WarpHandler.DirectWarp(item.Destination, item.IgnoreDisabled));
         }
-        private static bool CanUseHere(Farmer who)
-        {
-            return (
-                    !who.UsingTool &&
-                    !Game1.pickingTool &&
-                    Game1.activeClickableMenu is null &&
-                    !Game1.eventUp &&
-                    !Game1.isFestival() &&
-                    !Game1.nameSelectUp &&
-                    Game1.numberOfSelectedItems == -1 &&
-                    !Game1.fadeToBlack &&
-                    !who.swimming.Value &&
-                    !who.bathingClothes.Value &&
-                    !who.onBridge.Value
-                    );
-        }
         private static void DoTotemWarpEffects(Color color, string id, bool Consume, Farmer who, Func<Farmer, bool> action)
         {
             if (!int.TryParse(id, out int index))
-            {
                 index = Utils.GetDeterministicHashCode(id);
-            }
             who.jitterStrength = 1f;
             who.currentLocation.playSound("warrior", NetAudio.SoundContext.Default);
             who.faceDirection(2);
@@ -136,9 +100,8 @@ namespace WarpNetwork
                 new FarmerSprite.AnimationFrame( (short) who.FarmerSprite.CurrentFrame, 0, false, false, new AnimatedSprite.endOfAnimationBehavior((f) => {
                     if (action(f))
                     {
-                        if(Consume){
+                        if(Consume)
                             who.reduceActiveItemByOne();
-                        }
                     } else
                     {
                         who.temporarilyInvincible = false;

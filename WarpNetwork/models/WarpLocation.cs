@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 using StardewModdingAPI;
 using xTile.Dimensions;
 
@@ -17,16 +18,10 @@ namespace WarpNetwork.models
         public bool OverrideMapProperty { set; get; } = false;
         public bool AlwaysHide { get; set; } = false;
         public virtual string Icon { set; get; } = "";
-        public Texture2D IconTex
-        {
-            get
-            {
-                if (cachedIcon == null)
-                    cachedIcon = ModEntry.helper.GameContent.Load<Texture2D>("Data/WarpNetwork/Icons/" + Icon);
-                return cachedIcon;
-            }
-        }
 
+        [JsonIgnore]
+        public Texture2D IconTex
+            => cachedIcon ??= ModEntry.helper.GameContent.Load<Texture2D>("Data/WarpNetwork/Icons/" + Icon);
         public Location CoordsAsLocation() => new Location(X, Y);
     }
 }
