@@ -86,7 +86,7 @@ namespace WarpNetwork
                     //dependency loop when editing farm map leaves farm as null
                     foreach (Building building in farm.buildings)
                     {
-                        switch (building.buildingType.ToString())
+                        switch (building.buildingType.Value)
                         {
                             case "Water Obelisk":
                                 AnyObelisk = true;
