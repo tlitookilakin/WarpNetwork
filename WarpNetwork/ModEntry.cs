@@ -14,6 +14,7 @@ namespace WarpNetwork
         public static readonly string pathLocData = PathUtilities.NormalizeAssetName("Data/WarpNetwork/Destinations");
         public static readonly string pathItemData = PathUtilities.NormalizeAssetName("Data/WarpNetwork/WarpItems");
         public static readonly string pathIcons = PathUtilities.NormalizeAssetName("Data/WarpNetwork/Icons");
+        public static readonly string pathObjectData = PathUtilities.NormalizeAssetName("Data/WarpNetwork/Objects");
         internal static readonly HashSet<string> knownIcons = new(new[] {"DEFAULT", "farm", "mountain", "island", "desert", "beach", "RETURN"});
 
         //main
@@ -45,7 +46,9 @@ namespace WarpNetwork
         public override object GetApi() => api;
         private void LoadAssets(object _, AssetRequestedEventArgs ev)
         {
-            if (ev.Name.IsEquivalentTo(pathLocData))
+            if (ev.Name.IsEquivalentTo(pathObjectData))
+                ev.LoadFromModFile<Dictionary<string, WarpItem>>("assets/WarpObjects.json", AssetLoadPriority.Low);
+            else if (ev.Name.IsEquivalentTo(pathLocData))
                 ev.LoadFromModFile<Dictionary<string, WarpLocation>>("assets/Destinations.json", AssetLoadPriority.Medium);
             else if (ev.Name.IsEquivalentTo(pathItemData))
                 ev.LoadFromModFile<Dictionary<string, WarpItem>>("assets/WarpItems.json", AssetLoadPriority.Medium);

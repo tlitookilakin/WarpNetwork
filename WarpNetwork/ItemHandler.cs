@@ -1,5 +1,6 @@
 ﻿using AeroCore;
 using AeroCore.API;
+using AeroCore.Utils;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
@@ -20,6 +21,7 @@ namespace WarpNetwork
         internal static void Init()
         {
             ModEntry.AeroAPI.UseItemEvent += TryUseTotem;
+            ModEntry.AeroAPI.UseObjectEvent += ActivateObject;
         }
         internal static void TryUseTotem(IUseItemEventArgs ev)
         {
@@ -38,6 +40,15 @@ namespace WarpNetwork
                 ev.ConsumeItem = false; //manage it manually if its a totem
                 ev.IsHandled = true;
             }
+        }
+        internal static void ActivateObject(IUseObjectEventArgs ev)
+        {
+            if (ev.IsHandled || ev.IsChecking || !Utils.GetWarpObjects().TryGetValue(ev.ObjectStringID, out var data))
+                return;
+
+            ev.IsHandled = true;
+            Color color = data.Color.TryParseColor(out var c) ? c : Color.White;
+            DoTotemWarpEffects(color, ev.ObjectStringID, false, ev.Who, (f) => WarpHandler.DirectWarp(data.Destination, data.IgnoreDisabled), true);
         }
         private static bool UseItem(Farmer who, string id)
         {
@@ -77,10 +88,10 @@ namespace WarpNetwork
         }
         private static void ConfirmUseItem(WarpItem item, Farmer who, string id)
         {
-            Color color = Utils.ParseColor(item.Color);
+            Color color = item.Color.TryParseColor(out var c) ? c : Color.White;
             DoTotemWarpEffects(color, id, item.Consume, who, (f) => WarpHandler.DirectWarp(item.Destination, item.IgnoreDisabled));
         }
-        private static void DoTotemWarpEffects(Color color, string id, bool Consume, Farmer who, Func<Farmer, bool> action)
+        private static void DoTotemWarpEffects(Color color, string id, bool Consume, Farmer who, Func<Farmer, bool> action, bool isCraftable = false)
         {
             if (!int.TryParse(id, out int index))
                 index = Utils.GetDeterministicHashCode(id);
@@ -106,53 +117,56 @@ namespace WarpNetwork
                     }
                 }), true)
             }, null);
-            // reflection
-            Multiplayer mp = ModEntry.helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
-            // --
-            mp.broadcastSprites(who.currentLocation,
-            new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(0.0f, -96f), false, false, false, 0.0f)
+            if (!isCraftable) // no support for bigcraftables until 1.6. otherwise you'll get random sprites
             {
-                motion = new Vector2(0.0f, -1f),
-                scaleChange = 0.01f,
-                alpha = 1f,
-                alphaFade = 0.0075f,
-                shakeIntensity = 1f,
-                initialPosition = who.Position + new Vector2(0.0f, -96f),
-                xPeriodic = true,
-                xPeriodicLoopTime = 1000f,
-                xPeriodicRange = 4f,
-                layerDepth = 1f
-            },
-            new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(-64f, -96f), false, false, false, 0.0f)
-            {
-                motion = new Vector2(0.0f, -0.5f),
-                scaleChange = 0.005f,
-                scale = 0.5f,
-                alpha = 1f,
-                alphaFade = 0.0075f,
-                shakeIntensity = 1f,
-                delayBeforeAnimationStart = 10,
-                initialPosition = who.Position + new Vector2(-64f, -96f),
-                xPeriodic = true,
-                xPeriodicLoopTime = 1000f,
-                xPeriodicRange = 4f,
-                layerDepth = 0.9999f
-            },
-            new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(64f, -96f), false, false, false, 0.0f)
-            {
-                motion = new Vector2(0.0f, -0.5f),
-                scaleChange = 0.005f,
-                scale = 0.5f,
-                alpha = 1f,
-                alphaFade = 0.0075f,
-                delayBeforeAnimationStart = 20,
-                shakeIntensity = 1f,
-                initialPosition = who.Position + new Vector2(64f, -96f),
-                xPeriodic = true,
-                xPeriodicLoopTime = 1000f,
-                xPeriodicRange = 4f,
-                layerDepth = 0.9988f
-            });
+                // reflection
+                Multiplayer mp = ModEntry.helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
+                // --
+                mp.broadcastSprites(who.currentLocation,
+                new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(0.0f, -96f), false, false, false, 0.0f)
+                {
+                    motion = new Vector2(0.0f, -1f),
+                    scaleChange = 0.01f,
+                    alpha = 1f,
+                    alphaFade = 0.0075f,
+                    shakeIntensity = 1f,
+                    initialPosition = who.Position + new Vector2(0.0f, -96f),
+                    xPeriodic = true,
+                    xPeriodicLoopTime = 1000f,
+                    xPeriodicRange = 4f,
+                    layerDepth = 1f
+                },
+                new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(-64f, -96f), false, false, false, 0.0f)
+                {
+                    motion = new Vector2(0.0f, -0.5f),
+                    scaleChange = 0.005f,
+                    scale = 0.5f,
+                    alpha = 1f,
+                    alphaFade = 0.0075f,
+                    shakeIntensity = 1f,
+                    delayBeforeAnimationStart = 10,
+                    initialPosition = who.Position + new Vector2(-64f, -96f),
+                    xPeriodic = true,
+                    xPeriodicLoopTime = 1000f,
+                    xPeriodicRange = 4f,
+                    layerDepth = 0.9999f
+                },
+                new TemporaryAnimatedSprite(index, 9999f, 1, 999, who.Position + new Vector2(64f, -96f), false, false, false, 0.0f)
+                {
+                    motion = new Vector2(0.0f, -0.5f),
+                    scaleChange = 0.005f,
+                    scale = 0.5f,
+                    alpha = 1f,
+                    alphaFade = 0.0075f,
+                    delayBeforeAnimationStart = 20,
+                    shakeIntensity = 1f,
+                    initialPosition = who.Position + new Vector2(64f, -96f),
+                    xPeriodic = true,
+                    xPeriodicLoopTime = 1000f,
+                    xPeriodicRange = 4f,
+                    layerDepth = 0.9988f
+                });
+            }
             Game1.screenGlowOnce(color, false, 0.005f, 0.3f);
             Utility.addSprinklesToLocation(who.currentLocation, who.getTileX(), who.getTileY(), 16, 16, 1300, 20, Color.White, null, true);
         }

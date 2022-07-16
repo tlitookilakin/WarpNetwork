@@ -29,7 +29,8 @@ namespace WarpNetwork
             {"json", "Prints the player's current position & location as a destination json."},
             {"held_id", "Prints the ID of the currently held item."},
             {"menu", "Activates the warp menu in-game."},
-            {"debug", "Outputs diagnostic information."}
+            {"debug", "Outputs diagnostic information."},
+            {"objects", "Lists registered warp objects."}
         };
         private static readonly Dictionary<string, string> CmdHelp = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase)
         {
@@ -40,7 +41,8 @@ namespace WarpNetwork
             {"json", "Prints the player's current position & location as a destination json."},
             {"held_id", "Prints the ID of the currently held item."},
             {"menu", "Takes one optional argument, the name of the location to warp from. Activates the warp menu in-game."},
-            {"debug", "Outputs diagnostic information."}
+            {"debug", "Outputs diagnostic information."},
+            {"objects", "Lists registered warp objects."}
         };
         private static readonly Dictionary<string, Action<string[]>> Cmds = new Dictionary<string, Action<string[]>>(StringComparer.InvariantCultureIgnoreCase)
         {
@@ -51,7 +53,8 @@ namespace WarpNetwork
             {"json", CopyJson},
             {"held_id", GetHeldID},
             {"menu", WarpMenu},
-            {"debug", PrintDebug}
+            {"debug", PrintDebug},
+            {"objects", GetObjects}
         };
         public static void Main(string _, string[] args)
         {
@@ -109,18 +112,30 @@ namespace WarpNetwork
         }
         private static void GetItems(string[] args)
         {
-            Dictionary<string, WarpItem> dict = Utils.GetWarpItems();
-            StringBuilder builder = new();
-            foreach (string key in dict.Keys)
+            StringBuilder sb = new();
+            foreach ((var k, var v) in Utils.GetWarpItems())
             {
-                WarpItem item = dict[key];
-                builder.AppendLine();
-                builder.Append(key).AppendLine(": ");
-                builder.Append("\tDestination: ").Append(item.Destination);
-                builder.Append(", IgnoreDisabled: ").Append(item.IgnoreDisabled);
-                builder.Append(", Color: '").Append(item.Color).AppendLine("'");
+                sb.AppendLine();
+                sb.Append(k).AppendLine(": ");
+                sb.Append("\tDestination: ").Append(v.Destination);
+                sb.Append(", IgnoreDisabled: ").Append(v.IgnoreDisabled);
+                sb.Append(", Color: '").Append(v.Color).Append('\'');
+                sb.Append(", Consume: ").AppendLine(v.Consume ? "TRUE" : "FALSE");
             }
-            print(builder.ToString());
+            print(sb.ToString());
+        }
+        private static void GetObjects(string[] args)
+        {
+            StringBuilder sb = new();
+            foreach((var k, var v) in Utils.GetWarpObjects())
+            {
+                sb.AppendLine();
+                sb.Append(k).AppendLine(": ");
+                sb.Append("\tDestination: ").Append(v.Destination);
+                sb.Append(", IgnoreDisabled: ").Append(v.IgnoreDisabled);
+                sb.Append(", Color: '").Append(v.Color).AppendLine("'");
+            }
+            print(sb.ToString());
         }
         private static void CopyJson(string[] args)
         {
@@ -175,7 +190,7 @@ namespace WarpNetwork
             sb.AppendLine();
             sb.Append("Location: ").AppendLine(Game1.player.currentLocation.Name);
             sb.Append("Position: ").AppendLine(Game1.player.getTileLocationPoint().ToString());
-            sb.Append("DesertWarp: ").AppendLine(WarpHandler.DesertWarp.ToString());
+            sb.Append("DesertWarp: ").AppendLine(WarpHandler.DesertWarp.Value.ToString());
             sb.Append("WarpNetworkEntry: ").AppendLine(Game1.player.currentLocation.getMapProperty("WarpNetworkEntry"));
             sb.Append("Is Multiplayer: ").AppendLine(Game1.IsMultiplayer.ToString());
             sb.Append("Is Host: ").AppendLine(Game1.IsMasterGame.ToString());

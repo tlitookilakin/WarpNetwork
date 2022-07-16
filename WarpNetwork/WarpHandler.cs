@@ -79,7 +79,7 @@ namespace WarpNetwork
             Game1.activeClickableMenu = new WarpMenu(dests, (WarpLocation where) =>
             {
                 WarpToLocation(where, exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase));
-                Utils.reduceItemCount(Game1.player, stack, 1);
+                Game1.player.reduceActiveItemByOne();
             });
         }
         internal static void ShowFailureText()
@@ -129,7 +129,7 @@ namespace WarpNetwork
             {
                 if (Game1.getLocationFromName(loc.Location) is not null)
                 {
-                    if (!Utils.IsFestivalAtLocation(loc.Location) || Utils.IsFestivalReady())
+                    if (!Misc.IsFestivalAtLocation(loc.Location) || Misc.IsFestivalReady())
                     {
                         if (force || loc.Enabled)
                         {
