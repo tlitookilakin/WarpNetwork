@@ -1,4 +1,5 @@
 ﻿using AeroCore;
+using AeroCore.Utils;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
@@ -39,15 +40,14 @@ namespace WarpNetwork
 
             if (locs.ContainsKey(exclude))
             {
-                if (!locs[exclude].Enabled && !ModEntry.config.AccessFromDisabled)
+                if (!locs.IsAccessible(exclude) && !ModEntry.config.AccessFromDisabled)
                 {
                     ShowFailureText();
                     ModEntry.monitor.Log("Access from locked locations is disabled, menu not displayed.");
                     return;
                 }
             }
-            string normalized = exclude.ToLowerInvariant();
-            if (normalized == "_wand" && ModEntry.config.WandReturnEnabled && wandLocation.Value is not null)
+            if (exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase) && ModEntry.config.WandReturnEnabled && wandLocation.Value is not null)
             {
                 var dest = Game1.getLocationFromName(wandLocation.Value);
                 if (dest is not null)
@@ -55,12 +55,11 @@ namespace WarpNetwork
             }
             foreach ((string id, WarpLocation loc) in locs)
             {
-                string normid = id.ToLowerInvariant();
                 if (
                     !loc.AlwaysHide && (
-                    normalized == "_force" ||
-                    (loc.Enabled && normid != normalized) ||
-                    (normid == "farm" && normalized == "_wand")
+                    exclude.Equals("_force", StringComparison.OrdinalIgnoreCase) ||
+                    (locs.IsAccessible(id) && !id.Equals(exclude, StringComparison.OrdinalIgnoreCase)) ||
+                    (id.Equals("farm", StringComparison.OrdinalIgnoreCase) && exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase))
                     )
                 )
                 {
@@ -79,7 +78,7 @@ namespace WarpNetwork
             Item stack = consume ? Game1.player.CurrentItem : null;
             Game1.activeClickableMenu = new WarpMenu(dests, (WarpLocation where) =>
             {
-                WarpToLocation(where, normalized == "_wand");
+                WarpToLocation(where, exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase));
                 Utils.reduceItemCount(Game1.player, stack, 1);
             });
         }

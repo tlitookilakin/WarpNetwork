@@ -1,4 +1,5 @@
 ﻿using AeroCore;
+using AeroCore.Utils;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -23,12 +24,34 @@ namespace WarpNetwork
 
         public static Dictionary<string, WarpLocation> ApiLocs = new(StringComparer.OrdinalIgnoreCase);
         public static Dictionary<string, WarpItem> ApiItems = new(StringComparer.OrdinalIgnoreCase);
+        internal static HashSet<string> buildingTypes = new(StringComparer.OrdinalIgnoreCase);
 
         internal static void Init()
         {
             ModEntry.helper.Events.Content.AssetRequested += AssetRequested;
+            ModEntry.helper.Events.GameLoop.SaveLoaded += SaveLoaded;
+            ModEntry.helper.Events.World.BuildingListChanged += BuildingsChanged;
         }
 
+        private static void SaveLoaded(object _, SaveLoadedEventArgs ev)
+        {
+            buildingTypes.Clear();
+            foreach(var b in Misc.GetAllBuildings())
+                buildingTypes.Add(b.buildingType.Value.Collapse());
+
+            ModEntry.monitor.Log($"Save loaded, reloaded building type list: [{buildingTypes.ContentsToString()}]");
+        }
+        private static void BuildingsChanged(object _, BuildingListChangedEventArgs ev)
+        {
+            // remove THEN add, in case a building was removed and one of the same type was added
+            foreach (var b in ev.Removed)
+                buildingTypes.Remove(b.buildingType.Value.Collapse());
+
+            foreach (var b in ev.Added)
+                buildingTypes.Add(b.buildingType.Value.Collapse());
+
+            ModEntry.monitor.Log($"Buildings changed, new type list: [{buildingTypes.ContentsToString()}]");
+        }
         internal static void AssetRequested(object _, AssetRequestedEventArgs ev)
         {
             if (ev.Name.IsEquivalentTo(ModEntry.pathLocData))
@@ -60,71 +83,13 @@ namespace WarpNetwork
                 dict[key] = ApiLocs[key];
 
             foreach (string key in DefaultDests)
-                if (dict.ContainsKey(key))
+                if (dict.TryGetValue(key, out var dest))
                 {
-                    Translation label = ModEntry.i18n.Get("dest-" + key);
+                    Translation label = ModEntry.i18n.Get("dest." + key);
                     if (label.HasValue())
-                        dict[key].Label = label;
+                        dest.Label = label;
+                    dest.Enabled = ModEntry.config.WarpsEnabled != WarpEnabled.Never;
                 }
-
-            if (ModEntry.config.FarmWarpEnabled == WarpEnabled.Never && 
-                ModEntry.config.VanillaWarpsEnabled == WarpEnabled.Never)
-                return;
-
-            if (!ModEntry.config.ObeliskCheckRequired())
-            {
-                for(int i = 0; i < DefaultDests.Length; i++)
-                    if(DefaultDests[i] != "farm" || ModEntry.config.FarmWarpEnabled == WarpEnabled.Always)
-                        EnableLocation(dict, DefaultDests[i]);
-            }
-            else
-            {
-                bool AnyObelisk = ModEntry.config.FarmWarpEnabled == WarpEnabled.Always;
-                bool ObeliskAlways = ModEntry.config.VanillaWarpsEnabled == WarpEnabled.Always;
-
-                bool ObeliskWater = ObeliskAlways;
-                bool ObeliskEarth = ObeliskAlways;
-                bool ObeliskDesert = ObeliskAlways;
-                bool ObeliskIsland = ObeliskAlways;
-
-                Farm farm = Game1.getFarm();
-                if (farm is not null)
-                {
-                    //dependency loop when editing farm map leaves farm as null
-                    foreach (Building building in farm.buildings)
-                    {
-                        switch (building.buildingType.ToString())
-                        {
-                            case "Water Obelisk":
-                                AnyObelisk = true;
-                                ObeliskWater = true;
-                                break;
-                            case "Earth Obelisk":
-                                AnyObelisk = true;
-                                ObeliskEarth = true;
-                                break;
-                            case "Desert Obelisk":
-                                AnyObelisk = true;
-                                ObeliskDesert = true;
-                                break;
-                            case "Island Obelisk":
-                                AnyObelisk = true;
-                                ObeliskIsland = true;
-                                break;
-                        }
-                    }
-                }
-
-                if (ModEntry.config.VanillaWarpsEnabled != WarpEnabled.Never)
-                {
-                    EnableLocation(dict, "beach", ObeliskWater);
-                    EnableLocation(dict, "mountain", ObeliskEarth);
-                    EnableLocation(dict, "desert", ObeliskDesert);
-                    EnableLocation(dict, "island", ObeliskIsland);
-                }
-                if (ModEntry.config.FarmWarpEnabled != WarpEnabled.Never)
-                    EnableLocation(dict, "farm", AnyObelisk);
-            }
         }
         private static void AddVanillaWarpStatue(IAssetDataForMap map, string Name)
         {
@@ -171,11 +136,6 @@ namespace WarpNetwork
                     }
                 }
             }
-        }
-        private static void EnableLocation(IDictionary<string, WarpLocation> dict, string key, bool enabled = true)
-        {
-            if (dict.ContainsKey(key))
-                dict[key].Enabled = enabled;
         }
     }
 }

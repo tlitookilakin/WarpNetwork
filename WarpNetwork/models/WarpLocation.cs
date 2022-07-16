@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Content;
+﻿using AeroCore.Utils;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using StardewModdingAPI;
@@ -17,11 +18,14 @@ namespace WarpNetwork.models
         public virtual string Label { set; get; }
         public bool OverrideMapProperty { set; get; } = false;
         public bool AlwaysHide { get; set; } = false;
+        public string RequiredBuilding { set; get; } = null;
         public virtual string Icon { set; get; } = "";
 
         [JsonIgnore]
         public Texture2D IconTex
             => cachedIcon ??= ModEntry.helper.GameContent.Load<Texture2D>("Data/WarpNetwork/Icons/" + Icon);
-        public Location CoordsAsLocation() => new Location(X, Y);
+        public Location CoordsAsLocation() => new(X, Y);
+        public bool IsAccessible()
+            => Enabled && (RequiredBuilding is null || DataPatcher.buildingTypes.Contains(RequiredBuilding.Collapse()));
     }
 }

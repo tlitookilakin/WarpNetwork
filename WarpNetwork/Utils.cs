@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using AeroCore.Utils;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 using StardewValley;
@@ -252,5 +253,17 @@ namespace WarpNetwork
         }
         public static string WithoutPath(this string path, string prefix)
             => PathUtilities.GetSegments(path, PathUtilities.GetSegments(prefix).Length + 1)[^1];
+        internal static bool IsAnyObeliskBuilt(ICollection<WarpLocation> locs)
+        {
+            foreach (var loc in locs)
+                if (loc.RequiredBuilding is not null && DataPatcher.buildingTypes.Contains(loc.RequiredBuilding.Collapse()))
+                    return true;
+            return false;
+        }
+        public static bool IsAccessible(this IDictionary<string, WarpLocation> dict, string id)
+            => (!id.Equals("farm", StringComparison.OrdinalIgnoreCase) || 
+            ModEntry.config.FarmWarpEnabled != WarpEnabled.AfterObelisk || 
+            IsAnyObeliskBuilt(dict.Values)) && 
+            (dict[id]?.IsAccessible() ?? false);
     }
 }

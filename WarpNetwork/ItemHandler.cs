@@ -26,9 +26,6 @@ namespace WarpNetwork
             if (ev.IsHandled || !ev.NormalGameplay)
                 return;
 
-            // want to manually control when items are used
-            ev.ConsumeItem = false;
-
             if (ev.IsTool)
             {
                 if (ev.Item is Wand)
@@ -36,18 +33,18 @@ namespace WarpNetwork
                     ev.IsHandled = true;
                     WarpHandler.ShowWarpMenu("_wand");
                 }
-            } else
+            } else if (UseItem(Game1.player, ev.ItemStringID))
             {
-                ev.IsHandled = UseItem(Game1.player, ev.ItemStringID);
+                ev.ConsumeItem = false; //manage it manually if its a totem
+                ev.IsHandled = true;
             }
         }
         private static bool UseItem(Farmer who, string id)
         {
             Dictionary<string, WarpItem> items = Utils.GetWarpItems();
-            if (items.ContainsKey(id))
+            if (items.TryGetValue(id, out var item))
             {
-                WarpItem item = items[id];
-                if (item.Destination.ToLower() == "_all")
+                if (item.Destination.Equals("_all", StringComparison.OrdinalIgnoreCase))
                     WarpHandler.ShowWarpMenu("", item.Consume);
                 else if (ModEntry.config.WarpCancelEnabled)
                     RequestUseItem(item, id);
@@ -61,7 +58,7 @@ namespace WarpNetwork
         {
             currentTotem.Value = item;
             currentID.Value = id;
-            if (item.Destination.ToLowerInvariant() == "_return")
+            if (item.Destination.Equals("_return", StringComparison.OrdinalIgnoreCase))
                 if (WarpHandler.wandLocation.Value is not null)
                     Game1.currentLocation.createQuestionDialogue(ModEntry.i18n.Get("ui-usereturn"), Game1.currentLocation.createYesNoResponses(), AnswerRequest);
                 else
@@ -73,7 +70,7 @@ namespace WarpNetwork
         }
         private static void AnswerRequest(Farmer who, string key)
         {
-            if (key=="Yes")
+            if (key == "Yes")
                 ConfirmUseItem(currentTotem.Value, who, currentID.Value);
             currentTotem.Value = null;
             currentID.Value = null;

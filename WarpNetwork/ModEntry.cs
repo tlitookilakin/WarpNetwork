@@ -32,12 +32,6 @@ namespace WarpNetwork
 
             helper.Events.Content.AssetRequested += LoadAssets;
             helper.Events.GameLoop.GameLaunched += GameLaunched;
-            helper.Events.World.BuildingListChanged += updateBuildingList;
-        }
-        public void updateBuildingList(object sender, BuildingListChangedEventArgs ev)
-        {
-            if (config.ObeliskCheckRequired())
-                helper.GameContent.InvalidateCache(pathLocData);
         }
         public void GameLaunched(object sender, GameLaunchedEventArgs ev)
         {

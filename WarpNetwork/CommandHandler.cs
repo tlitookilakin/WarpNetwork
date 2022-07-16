@@ -103,6 +103,7 @@ namespace WarpNetwork
                 builder.Append(", Y: ").Append(loc.Y);
                 builder.Append(", Label: '").Append(loc.Label).AppendLine("'");
                 builder.Append(", Is Custom Handler: ").Append(loc is CustomWarpLocation ? "Yes" : "No");
+                builder.Append(", RequiredBuilding: ").Append(loc.RequiredBuilding);
             }
             print(builder.ToString());
         }
@@ -170,7 +171,7 @@ namespace WarpNetwork
             GetItems(args);
             GetHeldID(args);
             print(ModEntry.config.AsText());
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             sb.AppendLine();
             sb.Append("Location: ").AppendLine(Game1.player.currentLocation.Name);
             sb.Append("Position: ").AppendLine(Game1.player.getTileLocationPoint().ToString());
@@ -179,6 +180,10 @@ namespace WarpNetwork
             sb.Append("Is Multiplayer: ").AppendLine(Game1.IsMultiplayer.ToString());
             sb.Append("Is Host: ").AppendLine(Game1.IsMasterGame.ToString());
             sb.Append("Default Farm Totem Warp: ").AppendLine(Utils.GetActualFarmPoint(48, 7).ToString());
+            sb.Append("Built building types: [");
+            foreach (var s in DataPatcher.buildingTypes)
+                sb.Append('\'').Append(s).Append("', ");
+            sb.AppendLine("]");
             print(sb.ToString());
         }
     }
