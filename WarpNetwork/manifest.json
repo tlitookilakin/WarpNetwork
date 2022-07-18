@@ -9,7 +9,7 @@
   "UpdateKeys": [ "Nexus:8567", "Moddrop:951720", "GitHub:tlitookilakin/WarpNetwork" ],
   "Dependencies": [
     {
-      "UniqueID": "spacechase0.SpaceCore"
+      "UniqueID": "tlitookilakin.AeroCore"
     },
     {
       "UniqueID": "pathoschild.ContentPatcher",

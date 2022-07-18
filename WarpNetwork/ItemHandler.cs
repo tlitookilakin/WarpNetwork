@@ -32,6 +32,7 @@ namespace WarpNetwork
             {
                 if (ev.Item is Wand)
                 {
+                    ev.ConsumeItem = false;
                     ev.IsHandled = true;
                     WarpHandler.ShowWarpMenu("_wand");
                 }

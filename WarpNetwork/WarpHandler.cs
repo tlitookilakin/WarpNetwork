@@ -19,7 +19,7 @@ namespace WarpNetwork
         internal static readonly PerScreen<Point?> DesertWarp = new();
         internal static readonly PerScreen<string> wandLocation = new();
         internal static readonly PerScreen<Point> wandTile = new();
-        private static readonly WarpNetHandler returnHandler = new(() => wandLocation.Value is not null, () => "RETURN", () => ModEntry.i18n.Get("dest-return"), ReturnToPrev);
+        private static readonly WarpNetHandler returnHandler = new(() => wandLocation.Value is not null, () => "RETURN", () => ModEntry.i18n.Get("dest.return"), ReturnToPrev);
         
         internal static void Init()
         {
@@ -75,11 +75,11 @@ namespace WarpNetwork
                 ShowFailureText();
                 return;
             }
-            Item stack = consume ? Game1.player.CurrentItem : null;
             Game1.activeClickableMenu = new WarpMenu(dests, (WarpLocation where) =>
             {
                 WarpToLocation(where, exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase));
-                Game1.player.reduceActiveItemByOne();
+                if (consume)
+                    Game1.player.reduceActiveItemByOne();
             });
         }
         internal static void ShowFailureText()
