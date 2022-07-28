@@ -26,6 +26,7 @@ namespace WarpNetwork.models
             => cachedIcon ??= ModEntry.helper.GameContent.Load<Texture2D>("Data/WarpNetwork/Icons/" + Icon);
         public Location CoordsAsLocation() => new(X, Y);
         public bool IsAccessible()
-            => Enabled && (RequiredBuilding is null || DataPatcher.buildingTypes.Contains(RequiredBuilding.Collapse()));
+            => Enabled && (ModEntry.config.WarpsEnabled != WarpEnabled.AfterObelisk || 
+            RequiredBuilding is null || DataPatcher.buildingTypes.Contains(RequiredBuilding.Collapse()));
     }
 }

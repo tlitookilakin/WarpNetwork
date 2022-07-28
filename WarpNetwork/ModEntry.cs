@@ -3,6 +3,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using WarpNetwork.api;
 using WarpNetwork.models;
 
@@ -34,6 +35,7 @@ namespace WarpNetwork
             helper.Events.Content.AssetRequested += LoadAssets;
             helper.Events.GameLoop.GameLaunched += GameLaunched;
         }
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public void GameLaunched(object sender, GameLaunchedEventArgs ev)
         {
             AeroAPI = helper.ModRegistry.GetApi<AeroCore.API.IAeroCoreAPI>("tlitookilakin.AeroCore");
