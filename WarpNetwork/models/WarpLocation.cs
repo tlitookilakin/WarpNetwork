@@ -28,5 +28,7 @@ namespace WarpNetwork.models
         public bool IsAccessible()
             => Enabled && (ModEntry.config.WarpsEnabled != WarpEnabled.AfterObelisk || 
             RequiredBuilding is null || DataPatcher.buildingTypes.Contains(RequiredBuilding.Collapse()));
+        public void Reload()
+            => cachedIcon = null;
     }
 }

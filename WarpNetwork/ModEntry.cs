@@ -48,15 +48,15 @@ namespace WarpNetwork
         public override object GetApi() => api;
         private void LoadAssets(object _, AssetRequestedEventArgs ev)
         {
-            if (ev.Name.IsEquivalentTo(pathObjectData))
+            if (ev.NameWithoutLocale.IsEquivalentTo(pathObjectData))
                 ev.LoadFromModFile<Dictionary<string, WarpItem>>("assets/WarpObjects.json", AssetLoadPriority.Low);
-            else if (ev.Name.IsEquivalentTo(pathLocData))
+            else if (ev.NameWithoutLocale.IsEquivalentTo(pathLocData))
                 ev.LoadFromModFile<Dictionary<string, WarpLocation>>("assets/Destinations.json", AssetLoadPriority.Medium);
-            else if (ev.Name.IsEquivalentTo(pathItemData))
+            else if (ev.NameWithoutLocale.IsEquivalentTo(pathItemData))
                 ev.LoadFromModFile<Dictionary<string, WarpItem>>("assets/WarpItems.json", AssetLoadPriority.Medium);
-            else if (ev.Name.StartsWith(pathIcons))
+            else if (ev.NameWithoutLocale.StartsWith(pathIcons))
             {
-                var name = ev.Name.ToString().WithoutPath(pathIcons);
+                var name = ev.NameWithoutLocale.ToString().WithoutPath(pathIcons);
                 if (knownIcons.Contains(name))
                     ev.LoadFromModFile<Texture2D>($"assets/icons/{name}.png", AssetLoadPriority.Low);
                 else
