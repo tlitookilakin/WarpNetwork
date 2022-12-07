@@ -176,11 +176,17 @@ namespace WarpNetwork
             if (where is CustomWarpLocation custom)
             {
                 var name = Game1.currentLocation.NameOrUniqueName;
+                var tile = Game1.player.getTileLocationPoint();
 				custom.handler.Warp();
                 if (custom.handler == returnHandler)
+                {
                     wandLocation.Value = null;
+                }
                 else
+                {
                     wandLocation.Value = name;
+                    wandTile.Value = tile;
+                }
                 return;
             }
             if (Game1.currentLocation.Name != "Temp")
