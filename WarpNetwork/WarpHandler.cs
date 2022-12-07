@@ -25,6 +25,7 @@ namespace WarpNetwork
         {
             ModEntry.AeroAPI.RegisterAction("warpnetwork", (w, s, t, g) => ShowWarpMenu(s));
             ModEntry.AeroAPI.RegisterAction("warpnetworkto", (w, s, t, g) => DirectWarp(s));
+            ModEntry.AeroAPI.RegisterTouchAction("warpnetworkto", (w, s, t, g) => DirectWarp(s));
             ModEntry.helper.Events.GameLoop.DayEnding += Cleanup;
             ModEntry.helper.Events.GameLoop.ReturnedToTitle += Cleanup;
         }
