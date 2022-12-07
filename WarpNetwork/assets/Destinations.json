@@ -13,7 +13,8 @@
     "y": 20,
     "enabled": false,
     "label": "Mountains",
-    "icon":  "mountain"
+    "icon":  "mountain",
+    "requiredBuilding": "earth obelisk"
   },
   "beach": {
     "location": "Beach",
@@ -21,7 +22,8 @@
     "y": 4,
     "enabled": false,
     "label": "Beach",
-    "icon":  "beach"
+    "icon":  "beach",
+    "requiredBuilding": "water obelisk"
   },
   "desert": {
     "location": "Desert",
@@ -29,7 +31,8 @@
     "y": 43,
     "enabled": false,
     "label": "Desert",
-    "icon": "desert"
+    "icon": "desert",
+    "requiredBuilding": "desert obelisk"
   },
   "island": {
     "location": "IslandSouth",
@@ -37,6 +40,7 @@
     "y": 11,
     "enabled": false,
     "label": "Ginger Island",
-    "icon": "island"
+    "icon": "island",
+    "requiredBuilding": "island obelisk"
   }
 }

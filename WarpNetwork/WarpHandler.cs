@@ -1,5 +1,6 @@
-﻿using Microsoft.Xna.Framework;
-using SpaceCore.Events;
+﻿using AeroCore;
+using AeroCore.Utils;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 using StardewValley;
@@ -12,12 +13,27 @@ using WarpNetwork.models;
 
 namespace WarpNetwork
 {
+    [ModInit]
     class WarpHandler
     {
         internal static readonly PerScreen<Point?> DesertWarp = new();
         internal static readonly PerScreen<string> wandLocation = new();
         internal static readonly PerScreen<Point> wandTile = new();
-        private static readonly WarpNetHandler returnHandler = new(() => wandLocation.Value is not null, () => "RETURN", () => ModEntry.i18n.Get("dest-return"), ReturnToPrev);
+        private static readonly WarpNetHandler returnHandler = new(() => wandLocation.Value is not null, () => "RETURN", () => ModEntry.i18n.Get("dest.return"), ReturnToPrev);
+        
+        internal static void Init()
+        {
+            ModEntry.AeroAPI.RegisterAction("warpnetwork", (w, s, t, g) => ShowWarpMenu(s));
+            ModEntry.AeroAPI.RegisterAction("warpnetworkto", (w, s, t, g) => DirectWarp(s));
+            ModEntry.AeroAPI.RegisterTouchAction("warpnetworkto", (w, s, t, g) => DirectWarp(s));
+            ModEntry.helper.Events.GameLoop.DayEnding += Cleanup;
+            ModEntry.helper.Events.GameLoop.ReturnedToTitle += Cleanup;
+        }
+        private static void Cleanup(object sender, object ev){
+            wandTile.ResetAllScreens();
+            wandLocation.ResetAllScreens();
+            DesertWarp.ResetAllScreens();
+        }
         public static void ShowWarpMenu(string exclude = "", bool consume = false)
         {
             if (!ModEntry.config.MenuEnabled)
@@ -32,15 +48,14 @@ namespace WarpNetwork
 
             if (locs.ContainsKey(exclude))
             {
-                if (!locs[exclude].Enabled && !ModEntry.config.AccessFromDisabled)
+                if (!locs.IsAccessible(exclude) && !ModEntry.config.AccessFromDisabled)
                 {
                     ShowFailureText();
                     ModEntry.monitor.Log("Access from locked locations is disabled, menu not displayed.");
                     return;
                 }
             }
-            string normalized = exclude.ToLowerInvariant();
-            if (normalized == "_wand" && ModEntry.config.WandReturnEnabled && wandLocation.Value is not null)
+            if (exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase) && ModEntry.config.WandReturnEnabled && wandLocation.Value is not null)
             {
                 var dest = Game1.getLocationFromName(wandLocation.Value);
                 if (dest is not null)
@@ -48,12 +63,11 @@ namespace WarpNetwork
             }
             foreach ((string id, WarpLocation loc) in locs)
             {
-                string normid = id.ToLowerInvariant();
                 if (
                     !loc.AlwaysHide && (
-                    normalized == "_force" ||
-                    (loc.Enabled && normid != normalized) ||
-                    (normid == "farm" && normalized == "_wand")
+                    exclude.Equals("_force", StringComparison.OrdinalIgnoreCase) ||
+                    (locs.IsAccessible(id) && !id.Equals(exclude, StringComparison.OrdinalIgnoreCase)) ||
+                    (id.Equals("farm", StringComparison.OrdinalIgnoreCase) && exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase))
                     )
                 )
                 {
@@ -69,21 +83,17 @@ namespace WarpNetwork
                 ShowFailureText();
                 return;
             }
-            Item stack = consume ? Game1.player.CurrentItem : null;
             Game1.activeClickableMenu = new WarpMenu(dests, (WarpLocation where) =>
             {
-                WarpToLocation(where, normalized == "_wand");
-                Utils.reduceItemCount(Game1.player, stack, 1);
+                WarpToLocation(where, exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase));
+                if (consume)
+                    Game1.player.reduceActiveItemByOne();
             });
         }
         internal static void ShowFailureText()
-        {
-            Game1.drawObjectDialogue(Game1.parseText(ModEntry.i18n.Get("ui-fail")));
-        }
+            => Game1.drawObjectDialogue(Game1.parseText(ModEntry.i18n.Get("ui-fail")));
         internal static void ShowFestivalNotReady()
-        {
-            Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\StringsFromCSFiles:Game1.cs.2973"));
-        }
+            => Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\StringsFromCSFiles:Game1.cs.2973"));
         private static void ReturnToPrev()
         {
             (int x, int y) = wandTile.Value;
@@ -91,23 +101,9 @@ namespace WarpNetwork
             //MUST copy to preserve. warp is called on delay and values may change.
             DoWarpEffects(() => Game1.warpFarmer(loc, x, y, false));
         }
-        public static void HandleAction(object sender, EventArgsAction action)
+        public static bool DirectWarp(string prop)
         {
-            if (action.Action.ToLower() == "warpnetwork")
-            {
-                ModEntry.monitor.Log("Warp Network Activated");
-                string[] args = action.ActionString.Split(' ');
-                ShowWarpMenu((args.Length > 1) ? args[1] : "");
-            }
-            if (action.Action.ToLower() == "warpnetworkto")
-            {
-                ModEntry.monitor.Log("Direct Warp Activated");
-                string[] args = action.ActionString.Split(' ');
-                DirectWarp(args);
-            }
-        }
-        public static bool DirectWarp(string[] args)
-        {
+            var args = prop.Split(' ');
             if (args.Length > 1)
             {
                 bool force = (args.Length > 2);
@@ -141,7 +137,7 @@ namespace WarpNetwork
             {
                 if (Game1.getLocationFromName(loc.Location) is not null)
                 {
-                    if (!Utils.IsFestivalAtLocation(loc.Location) || Utils.IsFestivalReady())
+                    if (!Misc.IsFestivalAtLocation(loc.Location) || Misc.IsFestivalReady())
                     {
                         if (force || loc.Enabled)
                         {
