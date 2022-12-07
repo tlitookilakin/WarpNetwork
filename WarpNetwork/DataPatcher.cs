@@ -91,15 +91,6 @@ namespace WarpNetwork
                     dest.Enabled = ModEntry.config.WarpsEnabled != WarpEnabled.Never;
                 }
         }
-                    EnableLocation(dict, "beach", ObeliskWater);
-                    EnableLocation(dict, "mountain", ObeliskEarth);
-                    EnableLocation(dict, "desert", ObeliskDesert);
-                    EnableLocation(dict, "island", ObeliskIsland);
-                }
-                if (ModEntry.config.FarmWarpEnabled != WarpEnabled.Never)
-                    EnableLocation(dict, "farm", AnyObelisk);
-            }
-        }
         private static void AddVanillaWarpStatue(IAssetDataForMap map, string Name)
         {
             Name = PathUtilities.GetSegments(Name)[^1];
