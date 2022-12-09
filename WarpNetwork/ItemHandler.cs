@@ -54,7 +54,8 @@ namespace WarpNetwork
         private static bool UseItem(Farmer who, string id)
         {
             Dictionary<string, WarpItem> items = Utils.GetWarpItems();
-            if (items.TryGetValue(id, out var item))
+            var aid = id.StartsWith("(O)") ? id[3..] : id;
+            if (items.TryGetValue(id, out var item) || items.TryGetValue(aid, out item))
             {
                 if (item.Destination.Equals("_all", StringComparison.OrdinalIgnoreCase))
                     WarpHandler.ShowWarpMenu("", item.Consume);
