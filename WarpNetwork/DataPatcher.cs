@@ -40,6 +40,7 @@ namespace WarpNetwork
                 buildingTypes.Add(b.buildingType.Value.Collapse());
 
             ModEntry.monitor.Log($"Save loaded, reloaded building type list: [{buildingTypes.ContentsToString()}]");
+            ModEntry.helper.GameContent.InvalidateCache(ModEntry.pathLocData);
         }
         private static void BuildingsChanged(object _, BuildingListChangedEventArgs ev)
         {
