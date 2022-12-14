@@ -36,6 +36,7 @@ namespace WarpNetwork
         }
         public static void ShowWarpMenu(string exclude = "", bool consume = false)
         {
+            ModEntry.monitor.Log($"Activating menu; exclude: {exclude}, consume: {consume}");
             if (!ModEntry.config.MenuEnabled)
             {
                 ShowFailureText();

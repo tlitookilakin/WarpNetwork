@@ -2,6 +2,7 @@
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
+using StardewValley;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using WarpNetwork.api;
@@ -34,6 +35,7 @@ namespace WarpNetwork
 
             helper.Events.Content.AssetRequested += LoadAssets;
             helper.Events.GameLoop.GameLaunched += GameLaunched;
+            LocalizedContentManager.OnLanguageChange += (c) => helper.GameContent.InvalidateCache(pathLocData);
         }
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void GameLaunched(object sender, GameLaunchedEventArgs ev)

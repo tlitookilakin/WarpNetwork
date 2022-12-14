@@ -55,12 +55,12 @@ namespace WarpNetwork
         }
         internal static void AssetRequested(object _, AssetRequestedEventArgs ev)
         {
-            if (ev.Name.IsEquivalentTo(ModEntry.pathLocData))
+            if (ev.NameWithoutLocale.IsEquivalentTo(ModEntry.pathLocData))
                 ev.Edit((a) => EditLocations(a.AsDictionary<string, WarpLocation>().Data));
-            else if (ev.Name.IsEquivalentTo(ModEntry.pathItemData))
+            else if (ev.NameWithoutLocale.IsEquivalentTo(ModEntry.pathItemData))
                 ev.Edit((a) => AddApiItems(a.AsDictionary<string, WarpItem>().Data));
-            else if (ModEntry.config.MenuEnabled && MapHasWarpStatue(ev.Name))
-                ev.Edit((a) => AddVanillaWarpStatue(a.AsMap(), ev.Name.ToString()));
+            else if (ModEntry.config.MenuEnabled && MapHasWarpStatue(ev.NameWithoutLocale))
+                ev.Edit((a) => AddVanillaWarpStatue(a.AsMap(), ev.NameWithoutLocale.ToString()));
         }
         private static bool MapHasWarpStatue(IAssetName name)
         {
@@ -87,8 +87,9 @@ namespace WarpNetwork
                 if (dict.TryGetValue(key, out var dest))
                 {
                     Translation label = ModEntry.i18n.Get("dest." + key);
+                    
                     if (label.HasValue())
-                        dest.Label = label;
+                        dest.Label = label.ToString();
                     dest.Enabled = ModEntry.config.WarpsEnabled != WarpEnabled.Never;
                 }
         }
