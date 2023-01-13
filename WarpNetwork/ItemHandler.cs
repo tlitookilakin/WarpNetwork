@@ -61,9 +61,9 @@ namespace WarpNetwork
 				if (item.Destination.Equals("_all", StringComparison.OrdinalIgnoreCase))
 					WarpHandler.ShowWarpMenu("", item.Consume);
 				else if (ModEntry.config.WarpCancelEnabled)
-					RequestUseItem(item, id);
+					RequestUseItem(item, aid);
 				else
-					ConfirmUseItem(item, who, id);
+					ConfirmUseItem(item, who, aid);
 				return true;
 			}
 			return false;
