@@ -105,16 +105,11 @@ namespace WarpNetwork
 		public static bool DirectWarp(string prop)
 		{
 			var args = prop.Split(' ');
-			if (args.Length > 1)
-			{
-				bool force = (args.Length > 2);
-				return DirectWarp(args[1], force);
-			}
-			else
-			{
-				ModEntry.monitor.Log("Warning! Map '" + Game1.currentLocation.Name + "' has invalid WarpNetworkTo property! Location MUST be specified!", LogLevel.Warn);
-				return false;
-			}
+			if (args.Length > 0)
+				return DirectWarp(args[0], args.Length > 1);
+
+			ModEntry.monitor.Log("Warning! Map '" + Game1.currentLocation.Name + "' has invalid WarpNetworkTo property! Location MUST be specified!", LogLevel.Warn);
+			return false;
 		}
 		public static bool DirectWarp(string location, bool force)
 		{
@@ -133,8 +128,7 @@ namespace WarpNetwork
 				return true;
 			}
 			Dictionary<string, WarpLocation> locs = Utils.GetWarpLocations();
-			WarpLocation loc = locs[location];
-			if (locs.ContainsKey(location))
+			if (locs.TryGetValue(location, out var loc))
 			{
 				if (Game1.getLocationFromName(loc.Location) is not null)
 				{
