@@ -1,9 +1,8 @@
-﻿using AeroCore;
-using AeroCore.Utils;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
+using StardewValley;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +13,6 @@ using xTile.Tiles;
 
 namespace WarpNetwork
 {
-	[ModInit]
 	class DataPatcher
 	{
 		private static readonly string[] DefaultDests = { "farm", "mountain", "beach", "desert", "island" };
@@ -33,10 +31,9 @@ namespace WarpNetwork
 		private static void SaveLoaded(object _, SaveLoadedEventArgs ev)
 		{
 			buildingTypes.Clear();
-			foreach(var b in Misc.GetAllBuildings())
+			foreach(var b in Utils.GetAllBuildings())
 				buildingTypes.Add(b.buildingType.Value.Collapse());
 
-			ModEntry.monitor.Log($"Save loaded, reloaded building type list: [{buildingTypes.ContentsToString()}]");
 			ModEntry.helper.GameContent.InvalidateCache(ModEntry.pathLocData);
 		}
 		private static void BuildingsChanged(object _, BuildingListChangedEventArgs ev)
@@ -47,8 +44,6 @@ namespace WarpNetwork
 
 			foreach (var b in ev.Added)
 				buildingTypes.Add(b.buildingType.Value.Collapse());
-
-			ModEntry.monitor.Log($"Buildings changed, new type list: [{buildingTypes.ContentsToString()}]");
 		}
 		internal static void AssetRequested(object _, AssetRequestedEventArgs ev)
 		{
