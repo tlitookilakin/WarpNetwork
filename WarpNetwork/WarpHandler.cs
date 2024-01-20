@@ -144,7 +144,7 @@ namespace WarpNetwork
 			{
 				if (Game1.getLocationFromName(loc.Location) is not null)
 				{
-					if (Game1.whereIsTodaysFest != loc.Location || Utility.getStartTimeOfFestival() < Game1.timeOfDay)
+					if (!Utility.isFestivalDay() || Game1.whereIsTodaysFest != loc.Location || Utility.getStartTimeOfFestival() < Game1.timeOfDay)
 					{
 						if (force || loc.Enabled)
 						{
