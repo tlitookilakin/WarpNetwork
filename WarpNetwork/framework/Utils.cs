@@ -11,11 +11,14 @@ using WarpNetwork.models;
 using xTile;
 using DColor = System.Drawing.Color;
 
-namespace WarpNetwork
+namespace WarpNetwork.framework
 {
 	static class Utils
 	{
-		public static Dictionary<string, IWarpNetHandler> CustomLocs = new(StringComparer.OrdinalIgnoreCase);
+		public static Dictionary<string, IWarpNetAPI.IDestinationHandler> CustomLocs =
+			new(StringComparer.OrdinalIgnoreCase){
+				{"_return", ReturnHandler.Instance }
+			};
 		private static readonly string[] VanillaMapNames =
 		{
 			"Farm","Farm_Fishing","Farm_Foraging","Farm_Mining","Farm_Combat","Farm_FourCorners","Farm_Island"
@@ -30,26 +33,33 @@ namespace WarpNetwork
 			{ "farm_fourcorners", 5 },
 			{ "farm_island", 6 }
 		};
-		public static Point GetActualFarmPoint(int default_x, int default_y)
-			=> GetActualFarmPoint(Game1.getFarm().Map, default_x, default_y);
-		public static Point GetActualFarmPoint(Map map, int default_x, int default_y, string filename = null)
+		public static void TryGetActualFarmPoint(ref Point Position, Map map = null, string filename = null)
 		{
-			int x = default_x;
-			int y = default_y;
+			map ??= Game1.getFarm().Map;
+
 			switch (GetFarmType(filename))
 			{
 				//four corners
 				case 5:
-					x = 48;
-					y = 39;
+					Position = new(48, 39);
 					break;
+
 				//beach
 				case 6:
-					x = 82;
-					y = 29;
+					Position = new(82, 29);
 					break;
 			}
-			return GetMapPropertyPosition(map, "WarpTotemEntry", x, y);
+			TryGetMapPropertyPosition(map, "WarpTotemEntry", ref Position);
+		}
+		public static bool TryGetDefaultPosition(string name, out Point Position)
+		{
+			Position = default;
+
+			if (!DataLoader.Locations(Game1.content).TryGetValue(name, out var loc) || !loc.DefaultArrivalTile.HasValue)
+				return false;
+
+			Position = loc.DefaultArrivalTile.Value;
+			return true;
 		}
 		public static string GetFarmMapPath()
 		{
@@ -58,63 +68,80 @@ namespace WarpNetwork
 				ModEntry.monitor.Log("Something is wrong! Game1.whichfarm does not contain a valid value!", LogLevel.Warn);
 				return "";
 			}
+
 			if (Game1.whichFarm < 7)
 				return VanillaMapNames[Game1.whichFarm];
+
 			if (Game1.whichModFarm is null)
 			{
 				ModEntry.monitor.Log("Something is wrong! Custom farm indicated, but Game1.whichModFarm is null!", LogLevel.Warn);
 				return "";
 			}
+
 			return Game1.whichModFarm.MapName;
 		}
 		public static int GetFarmType(string filename)
-			=> (filename is null) ? Game1.whichFarm : FarmTypeMap.TryGetValue(filename, out var type) ? type : 0;
-		public static Point GetMapPropertyPosition(Map map, string property, int default_x, int default_y)
+			=> filename is null ? Game1.whichFarm : FarmTypeMap.TryGetValue(filename, out var type) ? type : 0;
+		public static bool TryGetMapPropertyPosition(Map map, string property, ref Point position)
 		{
-			if (!map.Properties.ContainsKey(property))
-				return new Point(default_x, default_y);
-			string prop = map.Properties[property];
+			if (!map.Properties.TryGetValue(property, out var v))
+				return false;
+
+			string prop = (string)v;
+
 			string[] args = prop.Split(' ');
 			if (args.Length < 2)
-				return new Point(default_x, default_y);
-			return new Point(int.Parse(args[0]), int.Parse(args[1]));
+				return false;
+
+			if (int.TryParse(args[0], out int x) && int.TryParse(args[1], out int y))
+				position = new(x, y);
+			else
+				return false;
+
+			return true;
 		}
-		public static Dictionary<string, WarpLocation> GetWarpLocations()
+		public static Dictionary<string, IWarpNetAPI.IDestinationHandler> GetWarpLocations()
 		{
-			Dictionary<string, WarpLocation> data = ModEntry.helper.GameContent.Load<Dictionary<string, WarpLocation>>(ModEntry.pathLocData);
-			Dictionary<string, WarpLocation> ret = new(data, StringComparer.OrdinalIgnoreCase);
-			foreach ((string key, IWarpNetHandler value) in CustomLocs)
+			var data = ModEntry.helper.GameContent.Load<Dictionary<string, WarpLocation>>(ModEntry.AssetPath + "/Locations");
+			Dictionary<string, IWarpNetAPI.IDestinationHandler> ret = new(CustomLocs, StringComparer.OrdinalIgnoreCase);
+
+			foreach ((string key, var value) in data)
 			{
-				if (ret.ContainsKey(key))
-				{
-					ModEntry.monitor.Log("Overwriting destination '" + key + "' with custom handler", LogLevel.Debug);
-					ret[key] = new CustomWarpLocation(value);
-				}
+				if (!ret.ContainsKey(key))
+					ret.Add(key, value);
 				else
-				{
-					ret.Add(key, new CustomWarpLocation(value));
-				}
+					ModEntry.monitor.Log("Overwriting destination '" + key + "' with custom handler", LogLevel.Debug);
 			}
+
 			return ret;
 		}
 		public static Dictionary<string, WarpItem> GetWarpItems()
 			=> new(ModEntry.helper.GameContent.Load<Dictionary<string, WarpItem>>(ModEntry.pathItemData), StringComparer.OrdinalIgnoreCase);
+
 		public static Dictionary<string, WarpItem> GetWarpObjects()
 			=> new(ModEntry.helper.GameContent.Load<Dictionary<string, WarpItem>>(ModEntry.pathObjectData), StringComparer.OrdinalIgnoreCase);
+
 		public static string WithoutPath(this string path, string prefix)
 			=> PathUtilities.GetSegments(path, PathUtilities.GetSegments(prefix).Length + 1)[^1];
-		internal static bool IsAnyObeliskBuilt(ICollection<WarpLocation> locs)
+		internal static bool IsAnyObeliskBuilt()
 		{
-			foreach (var loc in locs)
-				if (loc.RequiredBuilding is not null && DataPatcher.buildingTypes.Contains(loc.RequiredBuilding.Collapse()))
-					return true;
+			foreach (var name in Game1.netWorldState.Value.LocationsWithBuildings)
+			{
+				var loc = Game1.getLocationFromName(name);
+				foreach (var building in loc.buildings)
+					if (building.buildingType.Value.Contains("obelisk", StringComparison.OrdinalIgnoreCase))
+						return true;
+			}
 			return false;
 		}
-		public static bool IsAccessible(this IDictionary<string, WarpLocation> dict, string id)
-			=> (!id.Equals("farm", StringComparison.OrdinalIgnoreCase) || 
-			ModEntry.config.FarmWarpEnabled != WarpEnabled.AfterObelisk || 
-			IsAnyObeliskBuilt(dict.Values)) && 
-			(dict[id]?.IsAccessible() ?? false);
+		public static bool IsAccessible(this IDictionary<string, IWarpNetAPI.IDestinationHandler> dict, string id, GameLocation where, Farmer who)
+			=> (
+				!id.Equals("farm", StringComparison.OrdinalIgnoreCase) ||
+				ModEntry.config.FarmWarpEnabled is not WarpEnabled.AfterObelisk ||
+				IsAnyObeliskBuilt()
+			) &&
+			dict.TryGetValue(id, out var loc) &&
+			loc.IsAccessible(where, who);
 
 		public static IEnumerable<Building> GetAllBuildings()
 		{
@@ -122,7 +149,7 @@ namespace WarpNetwork
 				for (int i = 0; i < loc.buildings.Count; i++)
 					yield return loc.buildings[i];
 		}
-		
+
 		public static string Collapse(this string source)
 		{
 			var src = source.AsSpan();
@@ -131,7 +158,7 @@ namespace WarpNetwork
 
 			int l = 0;
 			int n = 0;
-			for(int i = 0; i < src.Length; i++)
+			for (int i = 0; i < src.Length; i++)
 			{
 				if (src[i] is ' ')
 				{

@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using WarpNetwork.models;
 using SObject = StardewValley.Object;
 
-namespace WarpNetwork
+namespace WarpNetwork.framework
 {
 	class ItemHandler
 	{
@@ -19,7 +19,7 @@ namespace WarpNetwork
 		{
 			if (what is Wand && who == Game1.player && ModEntry.config.AccessFromWand)
 			{
-				WarpHandler.ShowWarpMenu("_wand");
+				WarpHandler.ShowWarpMenu(who.currentLocation, who, "_wand");
 				return true;
 			}
 			return UseItem(who, what);
@@ -30,17 +30,18 @@ namespace WarpNetwork
 				return false;
 
 			Color color = data.Color.TryParseColor(out var c) ? c : Color.White;
-			DoTotemWarpEffects(color, obj, false, who, (f) => WarpHandler.DirectWarp(data.Destination, data.IgnoreDisabled), true);
+			DoTotemWarpEffects(color, obj, false, who,
+				(f) => WarpHandler.DirectWarp(data.Destination, data.IgnoreDisabled, obj.Location, who), true);
 			return true;
 		}
 		private static bool UseItem(Farmer who, Item what)
 		{
 			Dictionary<string, WarpItem> items = Utils.GetWarpItems();
-			if (items.TryGetValue(what.QualifiedItemId, out var item) || (what is SObject && items.TryGetValue(what.ItemId, out item)))
+			if (items.TryGetValue(what.QualifiedItemId, out var item) || what is SObject && items.TryGetValue(what.ItemId, out item))
 			{
 				ModEntry.monitor.Log($"Totem data found for item with id '{what.QualifiedItemId}'.");
 				if (item.Destination.Equals("_all", StringComparison.OrdinalIgnoreCase))
-					WarpHandler.ShowWarpMenu("", item.Consume);
+					WarpHandler.ShowWarpMenu(who.currentLocation, who, "", item.Consume);
 				else if (ModEntry.config.WarpCancelEnabled)
 					RequestUseItem(item, what);
 				else
@@ -76,7 +77,8 @@ namespace WarpNetwork
 		{
 			ModEntry.monitor.Log($"Totem activated! Warping {who.Name} to {item.Destination}");
 			Color color = item.Color.TryParseColor(out var c) ? c : Color.White;
-			DoTotemWarpEffects(color, what, item.Consume, who, (f) => WarpHandler.DirectWarp(item.Destination, item.IgnoreDisabled));
+			DoTotemWarpEffects(color, what, item.Consume, who,
+				(f) => WarpHandler.DirectWarp(item.Destination, item.IgnoreDisabled, who.currentLocation, who));
 		}
 		private static void DoTotemWarpEffects(Color color, Item item, bool Consume, Farmer who, Func<Farmer, bool> action, bool isCraftable = false)
 		{

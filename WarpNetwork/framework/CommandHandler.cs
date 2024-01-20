@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text;
 using WarpNetwork.models;
 
-namespace WarpNetwork
+namespace WarpNetwork.framework
 {
 	class CommandHandler
 	{
-		private static readonly Dictionary<string, string> CmdDescs = new (StringComparer.InvariantCultureIgnoreCase)
+		private static readonly Dictionary<string, string> CmdDescs = new(StringComparer.InvariantCultureIgnoreCase)
 		{
 			{"help", "Displays a list of commands and their descriptions. Type 'warpnet help <subcommand>' to view help for a specific command."},
 			{"tp", "Teleport to a registered destination."},
@@ -22,7 +22,7 @@ namespace WarpNetwork
 			{"debug", "Outputs diagnostic information."},
 			{"objects", "Lists registered warp objects."}
 		};
-		private static readonly Dictionary<string, string> CmdHelp = new (StringComparer.InvariantCultureIgnoreCase)
+		private static readonly Dictionary<string, string> CmdHelp = new(StringComparer.InvariantCultureIgnoreCase)
 		{
 			{"help", "Type 'warpnet help <subcommand>' to view help for a specific command, or leave empty to show a list of commands."},
 			{"tp", "Takes one argument, the id of the warp location. Teleports you to that destination."},
@@ -34,16 +34,14 @@ namespace WarpNetwork
 			{"debug", "Outputs diagnostic information."},
 			{"objects", "Lists registered warp objects."}
 		};
-		private static readonly Dictionary<string, Action<string[]>> Cmds = new (StringComparer.InvariantCultureIgnoreCase)
+		private static readonly Dictionary<string, Action<string[]>> Cmds = new(StringComparer.InvariantCultureIgnoreCase)
 		{
 			{"help", ShowHelp},
 			{"tp", TP},
-			{"destinations", GetLocations},
 			{"items", GetItems},
 			{"json", CopyJson},
 			{"held_id", GetHeldID},
 			{"menu", WarpMenu},
-			{"debug", PrintDebug},
 			{"objects", GetObjects}
 		};
 		public static void Main(string _, string[] args)
@@ -80,25 +78,7 @@ namespace WarpNetwork
 			else if (args.Length == 0)
 				print("\nMust specify warp network location\n");
 			else
-				WarpHandler.DirectWarp(args[0], true);
-		}
-		private static void GetLocations(string[] args)
-		{
-			Dictionary<string, WarpLocation> dict = Utils.GetWarpLocations();
-			StringBuilder builder = new();
-			foreach ((string key, WarpLocation loc) in dict)
-			{
-				builder.AppendLine();
-				builder.Append(key).AppendLine(":");
-				builder.Append("\tLocation: ").Append(loc.Location);
-				builder.Append(", Enabled: ").Append(loc.Enabled);
-				builder.Append(", X: ").Append(loc.X);
-				builder.Append(", Y: ").Append(loc.Y);
-				builder.Append(", Label: '").Append(loc.Label).AppendLine("'");
-				builder.Append(", Is Custom Handler: ").Append(loc is CustomWarpLocation ? "Yes" : "No");
-				builder.Append(", RequiredBuilding: ").Append(loc.RequiredBuilding);
-			}
-			print(builder.ToString());
+				WarpHandler.DirectWarp(args[0], true, Game1.currentLocation, Game1.player);
 		}
 		private static void GetItems(string[] args)
 		{
@@ -117,7 +97,7 @@ namespace WarpNetwork
 		private static void GetObjects(string[] args)
 		{
 			StringBuilder sb = new();
-			foreach((var k, var v) in Utils.GetWarpObjects())
+			foreach ((var k, var v) in Utils.GetWarpObjects())
 			{
 				sb.AppendLine();
 				sb.Append(k).AppendLine(": ");
@@ -139,9 +119,11 @@ namespace WarpNetwork
 			StringBuilder builder = new();
 			builder.AppendLine("\"warpid\": {");
 			builder.Append("\t\"Location\": \"").Append(loc.Name).AppendLine("\",");
-			builder.Append("\t\"X\": ").Append(who.TilePoint.X).AppendLine(",");
-			builder.Append("\t\"Y\": ").Append(who.TilePoint.Y).AppendLine(",");
-			builder.AppendLine("\t\"Enabled\": true,");
+			builder.AppendLine("\t\"Position: {");
+			builder.Append("\t\t\"X\": ").Append(who.TilePoint.X).AppendLine(",");
+			builder.Append("\t\t\"Y\": ").AppendLine(who.TilePoint.Y.ToString());
+			builder.AppendLine("\t},");
+			builder.AppendLine("\t\"Enabled\": \"TRUE\",");
 			builder.AppendLine("\t\"Label\": \"label\"");
 			builder.Append('}');
 			if (DesktopClipboard.IsAvailable)
@@ -168,27 +150,7 @@ namespace WarpNetwork
 			if (Game1.player is null || Game1.currentLocation is null)
 				print("\nGame not loaded, cannot warp\n");
 			else
-				WarpHandler.ShowWarpMenu((args.Length > 0) ? args[0] : "");
-		}
-		private static void PrintDebug(string[] args)
-		{
-			GetLocations(args);
-			GetItems(args);
-			GetHeldID(args);
-			print(ModEntry.config.AsText());
-			StringBuilder sb = new();
-			sb.AppendLine();
-			sb.Append("Location: ").AppendLine(Game1.player.currentLocation.Name);
-			sb.Append("Position: ").AppendLine(Game1.player.TilePoint.ToString());
-			sb.Append("WarpNetworkEntry: ").AppendLine(Game1.player.currentLocation.getMapProperty("WarpNetworkEntry"));
-			sb.Append("Is Multiplayer: ").AppendLine(Game1.IsMultiplayer.ToString());
-			sb.Append("Is Host: ").AppendLine(Game1.IsMasterGame.ToString());
-			sb.Append("Default Farm Totem Warp: ").AppendLine(Utils.GetActualFarmPoint(48, 7).ToString());
-			sb.Append("Built building types: [");
-			foreach (var s in DataPatcher.buildingTypes)
-				sb.Append('\'').Append(s).Append("', ");
-			sb.AppendLine("]");
-			print(sb.ToString());
+				WarpHandler.ShowWarpMenu(Game1.currentLocation, Game1.player, args.Length > 0 ? args[0] : "");
 		}
 	}
 }

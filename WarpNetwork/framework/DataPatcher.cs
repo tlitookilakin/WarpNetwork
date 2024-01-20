@@ -11,7 +11,7 @@ using xTile.Dimensions;
 using xTile.Layers;
 using xTile.Tiles;
 
-namespace WarpNetwork
+namespace WarpNetwork.framework
 {
 	class DataPatcher
 	{
@@ -19,31 +19,11 @@ namespace WarpNetwork
 
 		public static Dictionary<string, WarpLocation> ApiLocs = new(StringComparer.OrdinalIgnoreCase);
 		public static Dictionary<string, WarpItem> ApiItems = new(StringComparer.OrdinalIgnoreCase);
-		internal static HashSet<string> buildingTypes = new(StringComparer.OrdinalIgnoreCase);
 
+		// TODO: add data porting
 		internal static void Init()
 		{
 			ModEntry.helper.Events.Content.AssetRequested += AssetRequested;
-			ModEntry.helper.Events.GameLoop.SaveLoaded += SaveLoaded;
-			ModEntry.helper.Events.World.BuildingListChanged += BuildingsChanged;
-		}
-
-		private static void SaveLoaded(object _, SaveLoadedEventArgs ev)
-		{
-			buildingTypes.Clear();
-			foreach(var b in Utils.GetAllBuildings())
-				buildingTypes.Add(b.buildingType.Value.Collapse());
-
-			ModEntry.helper.GameContent.InvalidateCache(ModEntry.pathLocData);
-		}
-		private static void BuildingsChanged(object _, BuildingListChangedEventArgs ev)
-		{
-			// remove THEN add, in case a building was removed and one of the same type was added
-			foreach (var b in ev.Removed)
-				buildingTypes.Remove(b.buildingType.Value.Collapse());
-
-			foreach (var b in ev.Added)
-				buildingTypes.Add(b.buildingType.Value.Collapse());
 		}
 		internal static void AssetRequested(object _, AssetRequestedEventArgs ev)
 		{
@@ -79,55 +59,58 @@ namespace WarpNetwork
 				if (dict.TryGetValue(key, out var dest))
 				{
 					Translation label = ModEntry.i18n.Get("dest." + key);
-					
+
 					if (label.HasValue())
 						dest.Label = label.ToString();
-					dest.Enabled = ModEntry.config.WarpsEnabled != WarpEnabled.Never;
+					dest.Condition = ModEntry.config.WarpsEnabled != WarpEnabled.Never ? "TRUE" : "FALSE";
 				}
 		}
 		private static void AddVanillaWarpStatue(IAssetDataForMap map, string Name)
 		{
 			Name = PathUtilities.GetSegments(Name)[^1];
-			Name = (Name == "Island_S") ? "island" : Name.StartsWith("Beach") ? "beach" : Name.ToLowerInvariant();
-			string id = (Name == Path.GetFileName(Utils.GetFarmMapPath()).ToLowerInvariant()) ? "farm" : Name;
+			Name = Name == "Island_S" ? "island" : Name.StartsWith("Beach") ? "beach" : Name.ToLowerInvariant();
+			string id = Name == Path.GetFileName(Utils.GetFarmMapPath()).ToLowerInvariant() ? "farm" : Name;
+
 			if (!map.Data.Properties.ContainsKey("WarpNetworkEntry"))
 			{
 				var locs = Utils.GetWarpLocations();
-				if (!locs.ContainsKey(id))
+				if (!locs.TryGetValue(id, out var loc))
 				{
-					ModEntry.monitor.Log("No destination entry for vanilla location '" + id + "'; skipping!", LogLevel.Warn);
+					ModEntry.monitor.Log($"No destination entry for vanilla location '{id}'; skipping!", LogLevel.Warn);
 					return;
 				}
 				Layer Buildings = map.Data.GetLayer("Buildings");
 				if (Buildings is null)
 				{
-					ModEntry.monitor.Log("Could not add Warp Network to vanilla location '" + id + "'; Map is missing Buildings layer", LogLevel.Warn);
+					ModEntry.monitor.Log($"Could not add Warp Network to vanilla location '{id}'; Map is missing Buildings layer", LogLevel.Warn);
 				}
-				else
+				else if (loc is WarpLocation warp)
 				{
-					if (locs[id].X >= 0 && locs[id].Y > 0)
+					if (warp.Position != default)
 					{
-						Location spot;
+						Point tilePos = warp.Position;
 						if (id == "farm")
 						{
-							Point pt = Utils.GetActualFarmPoint(map.Data, locs["farm"].X, locs["farm"].Y, Name);
-							spot = new Location(pt.X, pt.Y).Above;
+							Utils.TryGetActualFarmPoint(ref tilePos, map.Data, Name);
 						}
-						else
-						{
-							spot = locs[id].CoordsAsLocation().Above;
-						}
-						ModEntry.monitor.Log("Adding access point for destination '" + id + "' @ " + spot.X + ", " + spot.Y);
+						var spot = new Location(tilePos.X, tilePos.Y).Above;
+
+						ModEntry.monitor.Log($"Adding access point for destination '{id}' @ {spot.X}, {spot.Y}");
+
 						Tile tile = Buildings.Tiles[spot];
 						if (tile is null)
-							ModEntry.monitor.Log("No tile in building layer, could not add access point: '" + id + "' @ " + spot.X + ", " + spot.Y, LogLevel.Warn);
+							ModEntry.monitor.Log($"No tile in building layer, could not add access point: '{id}' @ {spot.X}, {spot.Y}", LogLevel.Warn);
 						else
-						tile.Properties["Action"] = "WarpNetwork " + id;
+							tile.Properties["Action"] = "WarpNetwork " + id;
 					}
 					else
 					{
-						ModEntry.monitor.Log("Could not add Warp Network to vanilla location '" + id + "'; Coordinates are outside map bounds.", LogLevel.Warn);
+						ModEntry.monitor.Log($"Could not add Warp Network to vanilla location '{id}'; Coordinates are outside map bounds.", LogLevel.Warn);
 					}
+				}
+				else
+				{
+					ModEntry.monitor.Log($"Could not add warp stature to Vanilla destination '{id}' because it's using a custom handler!", LogLevel.Warn);
 				}
 			}
 		}

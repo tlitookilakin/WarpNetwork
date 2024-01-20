@@ -5,16 +5,17 @@ using StardewValley;
 using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
+using WarpNetwork.api;
 using WarpNetwork.models;
 
-namespace WarpNetwork
+namespace WarpNetwork.ui
 {
 	class WarpMenu : IClickableMenu
 	{
 		const int buttonH = 72;
 
 		private readonly Rectangle panel = new(384, 373, 18, 18);
-		private readonly List<WarpLocation> locs;
+		private readonly List<IWarpNetAPI.IDestinationHandler> locs;
 		private readonly string title;
 		private readonly int titleW;
 		private static readonly Color shadow = Color.Black * 0.33f;
@@ -25,16 +26,17 @@ namespace WarpNetwork
 		private int index = 0;
 		private bool autoAlign = false;
 		private Rectangle mainPanel = new(0, 27, 0, 0);
-		private Action<WarpLocation> callback;
+		private Farmer who;
 		internal bool hovering = false;
-		public WarpMenu(List<WarpLocation> locs, Action<WarpLocation> callback, int x = 0, int y = 0, int width = 0, int height = 0)
+
+		public WarpMenu(List<IWarpNetAPI.IDestinationHandler> locs, int x = 0, int y = 0, int width = 0, int height = 0)
 	  : base(x, y, width, height, true)
 		{
 			autoAlign = x == 0 && y == 0;
 			this.width = width != 0 ? width : 600;
 			this.height = height != 0 ? height : 380;
-			this.callback = callback;
 			this.locs = locs;
+			who = Game1.player;
 			if (locs.Count < 1)
 			{
 				ModEntry.monitor.Log("Warp menu created with no destinations!", LogLevel.Warn);
@@ -127,7 +129,7 @@ namespace WarpNetwork
 						if (button.location != null)
 						{
 							ModEntry.monitor.Log("Destination selected! Closing menu and warping...");
-							callback(button.location);
+							button.location.Activate(who.currentLocation, who);
 							exitThisMenuNoSound();
 						}
 						else
@@ -165,7 +167,7 @@ namespace WarpNetwork
 				Rectangle bound = new(xPositionOnScreen + 12 + mainPanel.X, yPositionOnScreen + i * buttonH + 15 + mainPanel.Y, mainPanel.Width - 24, buttonH);
 				if (buttons.Count <= i && locs.Count > i + index)
 				{
-					buttons.Add(new(bound, locs[i + index], i) { scale = 3f, myID = i });
+					buttons.Add(new(bound, locs[i + index], i, who) { scale = 3f, myID = i });
 				}
 				else
 				{

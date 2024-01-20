@@ -3,7 +3,7 @@ using SObject = StardewValley.Object;
 using System;
 using HarmonyLib;
 
-namespace WarpNetwork
+namespace WarpNetwork.framework
 {
 	internal class Patches
 	{
@@ -17,8 +17,8 @@ namespace WarpNetwork
 			if (!Game1.player.canMove || __instance.isTemporarilyInvisible)
 				return true;
 
-			if (!Game1.eventUp && !Game1.isFestival() && 
-				!Game1.fadeToBlack && !Game1.player.swimming.Value && 
+			if (!Game1.eventUp && !Game1.isFestival() &&
+				!Game1.fadeToBlack && !Game1.player.swimming.Value &&
 				!Game1.player.bathingClothes.Value && !Game1.player.onBridge.Value)
 				return true;
 

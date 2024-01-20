@@ -3,23 +3,19 @@ using StardewModdingAPI.Utilities;
 using StardewModdingAPI;
 using StardewValley;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 
-namespace WarpNetwork
+namespace WarpNetwork.api
 {
 	/// <summary>The API which lets other mods add a config UI through Generic Mod Config Menu.</summary>
 	public interface IGMCMAPI
 	{
 		/*********
-        ** Methods
-        *********/
+		** Methods
+		*********/
 		/****
-        ** Must be called first
-        ****/
+		** Must be called first
+		****/
 		/// <summary>Register a mod whose config can be edited through the UI.</summary>
 		/// <param name="mod">The mod's manifest.</param>
 		/// <param name="reset">Reset the mod's config to its default values.</param>
@@ -30,8 +26,8 @@ namespace WarpNetwork
 
 
 		/****
-        ** Basic options
-        ****/
+		** Basic options
+		****/
 		/// <summary>Add a section title at the current position in the form.</summary>
 		/// <param name="mod">The mod's manifest.</param>
 		/// <param name="text">The title text shown in the form.</param>
@@ -116,8 +112,8 @@ namespace WarpNetwork
 
 
 		/****
-        ** Multi-page management
-        ****/
+		** Multi-page management
+		****/
 		/// <summary>Start a new page in the mod's config UI, or switch to that page if it already exists. All options registered after this will be part of that page.</summary>
 		/// <param name="mod">The mod's manifest.</param>
 		/// <param name="pageId">The unique page ID.</param>
@@ -134,8 +130,8 @@ namespace WarpNetwork
 
 
 		/****
-        ** Advanced
-        ****/
+		** Advanced
+		****/
 		/// <summary>Add an option at the current position in the form using custom rendering logic.</summary>
 		/// <param name="mod">The mod's manifest.</param>
 		/// <param name="name">The label text to show in the form.</param>

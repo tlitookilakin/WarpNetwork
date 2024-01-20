@@ -2,16 +2,18 @@
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValley.Menus;
+using StardewValley.TokenizableStrings;
 using System;
+using WarpNetwork.api;
 using WarpNetwork.models;
 
-namespace WarpNetwork
+namespace WarpNetwork.ui
 {
 	class WarpButton : ClickableComponent
 	{
 		private bool wasHovered = false;
 		private Color tint = Color.White;
-		public WarpLocation location
+		public IWarpNetAPI.IDestinationHandler location
 		{
 			set
 			{
@@ -21,21 +23,25 @@ namespace WarpNetwork
 			get => loc;
 		}
 		public int index = 0;
-		private WarpLocation loc;
+		private IWarpNetAPI.IDestinationHandler loc;
 		private static readonly Rectangle bg = new(384, 396, 15, 15);
 		private string text = "Unnamed";
 		private Vector2 textSize;
+		private Texture2D texture;
+		private Farmer who;
 
-		public WarpButton(Rectangle bounds, WarpLocation location, int index) : base(bounds, "")
+		public WarpButton(Rectangle bounds, IWarpNetAPI.IDestinationHandler location, int index, Farmer who) : base(bounds, "")
 		{
 			this.location = location;
 			this.index = index;
-			loc.Reload();
+			texture = loc.Icon;
+			this.who = who;
 		}
 		public void updateLabel()
 		{
-			text = loc.Label;
+			text = TokenParser.ParseText(loc.Label, player: who);
 			textSize = Game1.dialogueFont.MeasureString(text);
+			texture = loc.Icon;
 		}
 		public void draw(SpriteBatch b)
 		{
@@ -54,7 +60,7 @@ namespace WarpNetwork
 				wasHovered = false;
 			}
 			IClickableMenu.drawTextureBox(b, Game1.mouseCursors, bg, bounds.X, bounds.Y, bounds.Width, bounds.Height, tint, scale, false);
-			b.Draw(loc.IconTex, new Rectangle(bounds.X + 12, bounds.Y + 12, bounds.Height - 24, bounds.Height - 24), Color.White);
+			b.Draw(texture, new Rectangle(bounds.X + 12, bounds.Y + 12, bounds.Height - 24, bounds.Height - 24), Color.White);
 			Utility.drawTextWithShadow(b, text, Game1.dialogueFont, new Vector2(bounds.X + bounds.Height - 9, MathF.Round(bounds.Y - textSize.Y / 2 + bounds.Height / 2 + 6)), Game1.textColor);
 		}
 	}

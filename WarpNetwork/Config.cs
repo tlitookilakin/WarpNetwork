@@ -1,5 +1,7 @@
 ﻿using StardewModdingAPI;
 using System.Text;
+using WarpNetwork.api;
+using WarpNetwork.framework;
 
 namespace WarpNetwork
 {

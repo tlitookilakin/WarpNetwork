@@ -7,12 +7,16 @@ using StardewValley;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using WarpNetwork.api;
+using WarpNetwork.framework;
 using WarpNetwork.models;
 
 namespace WarpNetwork
 {
 	class ModEntry : Mod
 	{
+		internal static string AssetPath;
+		internal static string LegacyAssetPath = "Data/WarpNetwork";
+
 		//const
 		public static readonly string pathLocData = PathUtilities.NormalizeAssetName("Data/WarpNetwork/Destinations");
 		public static readonly string pathItemData = PathUtilities.NormalizeAssetName("Data/WarpNetwork/WarpItems");
@@ -37,14 +41,18 @@ namespace WarpNetwork
 			helper.Events.Content.AssetRequested += LoadAssets;
 			helper.Events.GameLoop.GameLaunched += GameLaunched;
 			LocalizedContentManager.OnLanguageChange += (c) => helper.GameContent.InvalidateCache(pathLocData);
+
+			AssetPath = "Mods/" + ModManifest.UniqueID;
 		}
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		public void GameLaunched(object sender, GameLaunchedEventArgs ev)
 		{
 			config.RegisterGMCM(ModManifest);
+
 			var harmony = new Harmony(ModManifest.UniqueID);
-			Patches.Patch(harmony);
-			helper.Events.Player.Warped += ObeliskPatch.MoveAfterWarp;
+			framework.Patches.Patch(harmony);
+			framework.ObeliskPatch.Patch(harmony);
+
 			helper.ConsoleCommands.Add(
 				"warpnet",
 				"Master command for Warp Network mod. Use 'warpnet' or 'warpnet help' to see a list of subcommands.",
