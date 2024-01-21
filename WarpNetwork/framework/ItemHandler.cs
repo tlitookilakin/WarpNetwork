@@ -15,6 +15,7 @@ namespace WarpNetwork.framework
 	{
 		private static readonly PerScreen<WarpItem> currentTotem = new();
 		private static readonly PerScreen<Item> currentItem = new();
+
 		internal static bool TryUseTotem(Farmer who, Item what)
 		{
 			if (what is Wand && who == Game1.player && ModEntry.config.AccessFromWand)
@@ -108,56 +109,51 @@ namespace WarpNetwork.framework
 					}
 				}), true)
 			}, null);
-			if (!isCraftable) // no support for bigcraftables until 1.6. otherwise you'll get random sprites
+			var mp = Game1.Multiplayer;
+			mp.broadcastSprites(who.currentLocation,
+			new TemporaryAnimatedSprite(0, 9999f, 1, 999, who.Position + new Vector2(0.0f, -96f), false, false, false, 0.0f)
 			{
-				// reflection
-				Multiplayer mp = ModEntry.helper.Reflection.GetField<Multiplayer>(typeof(Game1), "multiplayer").GetValue();
-				// --
-				mp.broadcastSprites(who.currentLocation,
-				new TemporaryAnimatedSprite(0, 9999f, 1, 999, who.Position + new Vector2(0.0f, -96f), false, false, false, 0.0f)
-				{
-					motion = new Vector2(0.0f, -1f),
-					scaleChange = 0.01f,
-					alpha = 1f,
-					alphaFade = 0.0075f,
-					shakeIntensity = 1f,
-					initialPosition = who.Position + new Vector2(0.0f, -96f),
-					xPeriodic = true,
-					xPeriodicLoopTime = 1000f,
-					xPeriodicRange = 4f,
-					layerDepth = 1f
-				}.WithItem(item),
-				new TemporaryAnimatedSprite(0, 9999f, 1, 999, who.Position + new Vector2(-64f, -96f), false, false, false, 0.0f)
-				{
-					motion = new Vector2(0.0f, -0.5f),
-					scaleChange = 0.005f,
-					scale = 0.5f,
-					alpha = 1f,
-					alphaFade = 0.0075f,
-					shakeIntensity = 1f,
-					delayBeforeAnimationStart = 10,
-					initialPosition = who.Position + new Vector2(-64f, -96f),
-					xPeriodic = true,
-					xPeriodicLoopTime = 1000f,
-					xPeriodicRange = 4f,
-					layerDepth = 0.9999f
-				}.WithItem(item),
-				new TemporaryAnimatedSprite(0, 9999f, 1, 999, who.Position + new Vector2(64f, -96f), false, false, false, 0.0f)
-				{
-					motion = new Vector2(0.0f, -0.5f),
-					scaleChange = 0.005f,
-					scale = 0.5f,
-					alpha = 1f,
-					alphaFade = 0.0075f,
-					delayBeforeAnimationStart = 20,
-					shakeIntensity = 1f,
-					initialPosition = who.Position + new Vector2(64f, -96f),
-					xPeriodic = true,
-					xPeriodicLoopTime = 1000f,
-					xPeriodicRange = 4f,
-					layerDepth = 0.9988f
-				}.WithItem(item));
-			}
+				motion = new Vector2(0.0f, -1f),
+				scaleChange = 0.01f,
+				alpha = 1f,
+				alphaFade = 0.0075f,
+				shakeIntensity = 1f,
+				initialPosition = who.Position + new Vector2(0.0f, -96f),
+				xPeriodic = true,
+				xPeriodicLoopTime = 1000f,
+				xPeriodicRange = 4f,
+				layerDepth = 1f
+			}.WithItem(item),
+			new TemporaryAnimatedSprite(0, 9999f, 1, 999, who.Position + new Vector2(-64f, -96f), false, false, false, 0.0f)
+			{
+				motion = new Vector2(0.0f, -0.5f),
+				scaleChange = 0.005f,
+				scale = 0.5f,
+				alpha = 1f,
+				alphaFade = 0.0075f,
+				shakeIntensity = 1f,
+				delayBeforeAnimationStart = 10,
+				initialPosition = who.Position + new Vector2(-64f, -96f),
+				xPeriodic = true,
+				xPeriodicLoopTime = 1000f,
+				xPeriodicRange = 4f,
+				layerDepth = 0.9999f
+			}.WithItem(item),
+			new TemporaryAnimatedSprite(0, 9999f, 1, 999, who.Position + new Vector2(64f, -96f), false, false, false, 0.0f)
+			{
+				motion = new Vector2(0.0f, -0.5f),
+				scaleChange = 0.005f,
+				scale = 0.5f,
+				alpha = 1f,
+				alphaFade = 0.0075f,
+				delayBeforeAnimationStart = 20,
+				shakeIntensity = 1f,
+				initialPosition = who.Position + new Vector2(64f, -96f),
+				xPeriodic = true,
+				xPeriodicLoopTime = 1000f,
+				xPeriodicRange = 4f,
+				layerDepth = 0.9988f
+			}.WithItem(item));
 			Game1.screenGlowOnce(color, false, 0.005f, 0.3f);
 			Utility.addSprinklesToLocation(who.currentLocation, who.TilePoint.X, who.TilePoint.Y, 16, 16, 1300, 20, Color.White, null, true);
 		}

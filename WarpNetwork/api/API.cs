@@ -84,6 +84,7 @@ namespace WarpNetwork.api
 				Game1.player.temporarilyInvincible = false;
 				Game1.player.temporaryInvincibilityTimer = 0;
 				Game1.displayFarmer = true;
+				WarpHandler.fromWand.Value = false;
 			}), 1000);
 		}
 	}

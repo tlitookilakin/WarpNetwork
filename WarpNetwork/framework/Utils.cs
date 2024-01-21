@@ -6,9 +6,11 @@ using StardewValley.Buildings;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using WarpNetwork.api;
 using WarpNetwork.models;
 using xTile;
+using static StardewValley.LocalizedContentManager;
 using DColor = System.Drawing.Color;
 
 namespace WarpNetwork.framework
@@ -116,32 +118,48 @@ namespace WarpNetwork.framework
 			return ret;
 		}
 		public static Dictionary<string, WarpItem> GetWarpItems()
-			=> new(ModEntry.helper.GameContent.Load<Dictionary<string, WarpItem>>(ModEntry.pathItemData), StringComparer.OrdinalIgnoreCase);
+			=> new(
+				ModEntry.helper.GameContent.Load<Dictionary<string, WarpItem>>(ModEntry.AssetPath + "/Totems"), 
+				StringComparer.OrdinalIgnoreCase
+			);
 
 		public static Dictionary<string, WarpItem> GetWarpObjects()
-			=> new(ModEntry.helper.GameContent.Load<Dictionary<string, WarpItem>>(ModEntry.pathObjectData), StringComparer.OrdinalIgnoreCase);
+			=> new(
+				ModEntry.helper.GameContent.Load<Dictionary<string, WarpItem>>(ModEntry.AssetPath + "/PlacedTotems"),
+				StringComparer.OrdinalIgnoreCase
+			);
 
 		public static string WithoutPath(this string path, string prefix)
 			=> PathUtilities.GetSegments(path, PathUtilities.GetSegments(prefix).Length + 1)[^1];
-		internal static bool IsAnyObeliskBuilt()
-		{
-			foreach (var name in Game1.netWorldState.Value.LocationsWithBuildings)
-			{
-				var loc = Game1.getLocationFromName(name);
-				foreach (var building in loc.buildings)
-					if (building.buildingType.Value.Contains("obelisk", StringComparison.OrdinalIgnoreCase))
-						return true;
-			}
-			return false;
-		}
+
 		public static bool IsAccessible(this IDictionary<string, IWarpNetAPI.IDestinationHandler> dict, string id, GameLocation where, Farmer who)
-			=> (
-				!id.Equals("farm", StringComparison.OrdinalIgnoreCase) ||
-				ModEntry.config.FarmWarpEnabled is not WarpEnabled.AfterObelisk ||
-				IsAnyObeliskBuilt()
-			) &&
-			dict.TryGetValue(id, out var loc) &&
-			loc.IsAccessible(where, who);
+			=> ModEntry.config.OverrideEnabled switch
+			{
+				WarpEnabled.Never => false,
+				WarpEnabled.Always => true,
+				WarpEnabled.Default =>
+					dict.TryGetValue(id, out var loc) &&
+					loc.IsAccessible(where, who),
+				_ => false
+			};
+
+		public static string ToLocalLocale(this IModHelper helper, string Locale)
+		{
+			var split = Locale.LastIndexOf('-');
+			var broad = split < 0 ? null : Locale[..split];
+
+			var fname = Path.Join(helper.DirectoryPath, "i18n", Locale + ".json");
+
+			if (File.Exists(fname))
+				return Locale;
+
+			fname = Path.Join(helper.DirectoryPath, "i18n", broad + ".json");
+
+			if (File.Exists(fname))
+				return broad;
+
+			return "default";
+		}
 
 		public static IEnumerable<Building> GetAllBuildings()
 		{

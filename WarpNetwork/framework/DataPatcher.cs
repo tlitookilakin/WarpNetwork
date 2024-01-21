@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
@@ -15,24 +16,78 @@ namespace WarpNetwork.framework
 {
 	class DataPatcher
 	{
-		private static readonly string[] DefaultDests = { "farm", "mountain", "beach", "desert", "island" };
+		private static readonly string[] DefaultDests = 
+			{ "farm", "mountain", "beach", "desert", "island" };
 
-		public static Dictionary<string, WarpLocation> ApiLocs = new(StringComparer.OrdinalIgnoreCase);
-		public static Dictionary<string, WarpItem> ApiItems = new(StringComparer.OrdinalIgnoreCase);
+		private static readonly HashSet<string> knownIcons =
+			new(new[] { "DEFAULT", "farm", "mountain", "island", "desert", "beach", "RETURN" });
 
-		// TODO: add data porting
+		private static readonly Func<LegacyWarpLocation, WarpLocation> convert_destination =
+			typeof(LegacyWarpLocation).GetMethod(nameof(LegacyWarpLocation.Convert))
+			.CreateDelegate<Func<LegacyWarpLocation, WarpLocation>>();
+
+		// TODO replace statue edits with location edits
+
 		internal static void Init()
 		{
 			ModEntry.helper.Events.Content.AssetRequested += AssetRequested;
 		}
 		internal static void AssetRequested(object _, AssetRequestedEventArgs ev)
 		{
-			if (ev.NameWithoutLocale.IsEquivalentTo(ModEntry.pathLocData))
-				ev.Edit((a) => EditLocations(a.AsDictionary<string, WarpLocation>().Data));
-			else if (ev.NameWithoutLocale.IsEquivalentTo(ModEntry.pathItemData))
-				ev.Edit((a) => AddApiItems(a.AsDictionary<string, WarpItem>().Data));
-			else if (ModEntry.config.MenuEnabled && MapHasWarpStatue(ev.NameWithoutLocale))
-				ev.Edit((a) => AddVanillaWarpStatue(a.AsMap(), ev.NameWithoutLocale.ToString()), AssetEditPriority.Late);
+			if (ev.NameWithoutLocale.IsDirectlyUnderPath(ModEntry.AssetPath)) 
+			{
+				var name = ev.NameWithoutLocale.ToString().WithoutPath(ModEntry.AssetPath);
+				switch (name)
+				{
+					case "Totems":
+						ev.LoadFromModFile<Dictionary<string, WarpItem>>("assets/Totems.json", AssetLoadPriority.Medium);
+						ev.Edit(static (a) => PortData(a.Data as Dictionary<string, WarpItem>, "WarpItems")); 
+						break;
+					case "PlacedTotems":
+						ev.LoadFromModFile<Dictionary<string, WarpItem>>("assets/PlacedTotems.json", AssetLoadPriority.Medium);
+						ev.Edit(static (a) => PortData(a.Data as Dictionary<string, WarpItem>, "Objects")); 
+						break;
+					case "Strings":
+						ev.LoadFromModFile<Dictionary<string, string>>(
+							$"i18n/{ModEntry.helper.ToLocalLocale(ev.Name.LocaleCode)}.json", 
+							AssetLoadPriority.High);
+						break;
+					case "Destinations":
+						ev.LoadFromModFile<Dictionary<string, WarpLocation>>("assets/Destinations.json", AssetLoadPriority.Medium);
+						ev.Edit(static (a) => PortData(a.Data as Dictionary<string, WarpLocation>, "Destinations", convert_destination));
+						break;
+
+				}
+			} else if (ev.NameWithoutLocale.IsDirectlyUnderPath(ModEntry.LegacyAssetPath))
+			{
+				var name = ev.NameWithoutLocale.ToString().WithoutPath(ModEntry.LegacyAssetPath);
+				switch (name)
+				{
+					case "Objects":
+					case "WarpItems":
+						ev.LoadFrom(static () => new Dictionary<string, WarpItem>(), AssetLoadPriority.Low);
+						break;
+					case "Destinations":
+						ev.LoadFrom(static () => new Dictionary<string, LegacyWarpLocation>(), AssetLoadPriority.Low);
+						break;
+				}
+			} else if (ev.NameWithoutLocale.IsDirectlyUnderPath(ModEntry.AssetPath + "/Icons"))
+			{
+				var name = ev.NameWithoutLocale.ToString().WithoutPath(ModEntry.AssetPath + "/Icons");
+				ev.LoadFromModFile<Texture2D>($"assets/icons/{name}.png", AssetLoadPriority.Low);
+			}
+		}
+		private static void PortData<T>(Dictionary<string, T> data, string oldName)
+		{
+			var legacy = ModEntry.helper.GameContent.Load<Dictionary<string, T>>(ModEntry.LegacyAssetPath + '/' + oldName);
+			foreach ((var key, var val) in legacy)
+				data.TryAdd(key, val);
+		}
+		private static void PortData<TI, TO>(Dictionary<string, TO> data, string oldName, Func<TI, TO> converter)
+		{
+			var legacy = ModEntry.helper.GameContent.Load<Dictionary<string, TI>>(ModEntry.LegacyAssetPath + '/' + oldName);
+			foreach ((var key, var val) in legacy)
+				data.TryAdd(key, converter(val));
 		}
 		private static bool MapHasWarpStatue(IAssetName name)
 		{
@@ -44,26 +99,6 @@ namespace WarpNetwork.framework
 					name.IsEquivalentTo("Maps/Desert") ||
 					name.IsEquivalentTo("Maps/" + Utils.GetFarmMapPath())
 				;
-		}
-		private static void AddApiItems(IDictionary<string, WarpItem> dict)
-		{
-			foreach (string key in ApiItems.Keys)
-				dict[key] = ApiItems[key];
-		}
-		private static void EditLocations(IDictionary<string, WarpLocation> dict)
-		{
-			foreach (string key in ApiLocs.Keys)
-				dict[key] = ApiLocs[key];
-
-			foreach (string key in DefaultDests)
-				if (dict.TryGetValue(key, out var dest))
-				{
-					Translation label = ModEntry.i18n.Get("dest." + key);
-
-					if (label.HasValue())
-						dest.Label = label.ToString();
-					dest.Condition = ModEntry.config.WarpsEnabled != WarpEnabled.Never ? "TRUE" : "FALSE";
-				}
 		}
 		private static void AddVanillaWarpStatue(IAssetDataForMap map, string Name)
 		{

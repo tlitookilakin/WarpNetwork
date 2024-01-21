@@ -25,6 +25,7 @@ namespace WarpNetwork.api
 			public Texture2D Icon { get; }
 			public bool Activate(GameLocation location, Farmer who);
 			public bool IsAccessible(GameLocation location, Farmer who);
+			public bool IsVisible(GameLocation location, Farmer who);
 			public void AfterWarp(string location, Point tile, IDestinationHandler handler);
 		}
 	}

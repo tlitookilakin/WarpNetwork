@@ -13,15 +13,12 @@ namespace WarpNetwork.framework
 
 		private readonly PerScreen<Point> targetTile = new(); 
 		private readonly PerScreen<string> targetLocation = new();
-		private static Texture2D icon;
 
 		public string Label
 			=> ModEntry.i18n.Get("dest.return");
 
 		public Texture2D Icon 
-			=> (icon ??= ModEntry.helper.GameContent.Load<Texture2D>(ModEntry.AssetPath + "/Icons/RETURN"));
-
-		public bool UseFX => true;
+			=> ModEntry.helper.GameContent.Load<Texture2D>(ModEntry.AssetPath + "/Icons/RETURN");
 
 		public bool Activate(GameLocation location, Farmer who)
 		{
@@ -40,7 +37,8 @@ namespace WarpNetwork.framework
 
 		public bool IsAccessible(GameLocation location, Farmer who)
 		{
-			return 
+			return
+				Game1.CurrentEvent is null &&
 				targetLocation.Value is not null && 
 				ModEntry.config.WandReturnEnabled &&
 				WarpHandler.fromWand.Value;
@@ -55,9 +53,9 @@ namespace WarpNetwork.framework
 			targetLocation.Value = name;
 		}
 
-		public void AfterWarp(GameLocation location, Farmer who, IWarpNetAPI.IDestinationHandler handler)
+		public bool IsVisible(GameLocation location, Farmer who)
 		{
-			throw new NotImplementedException();
+			return IsAccessible(location, who);
 		}
 	}
 }

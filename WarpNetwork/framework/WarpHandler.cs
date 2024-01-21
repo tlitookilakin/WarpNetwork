@@ -76,9 +76,8 @@ namespace WarpNetwork.framework
 
 			foreach ((string id, var loc) in locs)
 			{
-				var warploc = loc as WarpLocation;
 				if (
-					warploc is null || warploc.IsVisible(where, who) &&
+					loc.IsVisible(where, who) &&
 					(
 						// forced
 						exclude.Equals("_force", StringComparison.OrdinalIgnoreCase) ||
@@ -91,7 +90,7 @@ namespace WarpNetwork.framework
 					)
 				)
 				{
-					if (warploc is null || Game1.getLocationFromName(warploc.Location) is not null)
+					if (loc is not WarpLocation warploc || Game1.getLocationFromName(warploc.Location) is not null)
 						dests.Add(locs[id]);
 					else
 						ModEntry.monitor.Log("Invalid Location name '" + warploc.Location + "'; skipping entry.", LogLevel.Warn);

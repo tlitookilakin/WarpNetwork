@@ -27,7 +27,7 @@ namespace WarpNetwork.models
 						$"BUILDINGS_CONSTRUCTED All \"{RequiredBuilding}\" 1" :
 						"TRUE" :
 					"FALSE",
-				IconPath = Icon is null ? null : "Data/WarpNetwork/Icons/" + Icon,
+				IconPath = Icon is null ? null : ModEntry.LegacyAssetPath + "/Icons/" + Icon,
 				OverrideMapProperty = OverrideMapProperty,
 				Label = Label,
 				DisplayCondition = AlwaysHide ? "FALSE" : null
