@@ -2,7 +2,6 @@
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 using StardewValley;
-using StardewValley.Network;
 using StardewValley.Tools;
 using System;
 using System.Collections.Generic;

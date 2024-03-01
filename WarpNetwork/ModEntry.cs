@@ -1,16 +1,11 @@
 ﻿using HarmonyLib;
-using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewValley;
-using System.Collections.Generic;
 using WarpNetwork.api;
 using WarpNetwork.framework;
-using WarpNetwork.models;
 
 namespace WarpNetwork
 {
-	// TODO add icon failsafe
 	class ModEntry : Mod
 	{
 		internal static string AssetPath;
@@ -41,7 +36,6 @@ namespace WarpNetwork
 
 			var harmony = new Harmony(ModManifest.UniqueID);
 			framework.Patches.Patch(harmony);
-			framework.ObeliskPatch.Patch(harmony);
 
 			helper.ConsoleCommands.Add(
 				"warpnet",
