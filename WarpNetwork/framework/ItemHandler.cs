@@ -56,7 +56,7 @@ namespace WarpNetwork.framework
 			currentTotem.Value = item;
 			currentItem.Value = obj;
 			if (item.Destination.Equals("_return", StringComparison.OrdinalIgnoreCase))
-				if (WarpHandler.wandLocation.Value is not null)
+				if (ReturnHandler.Instance.HasReturnPoint)
 					Game1.currentLocation.createQuestionDialogue(ModEntry.i18n.Get("ui-usereturn"), Game1.currentLocation.createYesNoResponses(), AnswerRequest);
 				else
 					WarpHandler.ShowFailureText();

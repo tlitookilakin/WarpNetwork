@@ -80,7 +80,8 @@ namespace WarpNetwork.models
 				return false;
 			}
 
-			API.api.DoWarpEffects(() => Game1.warpFarmer(Location, tile.X, tile.Y, false), who, where);
+            ReturnHandler.Instance.SetReturnLocation();
+            API.api.DoWarpEffects(() => Game1.warpFarmer(Location, tile.X, tile.Y, false), who, where);
 			return true;
 		}
 

@@ -14,8 +14,6 @@ namespace WarpNetwork.framework
 {
 	class WarpHandler
 	{
-		internal static readonly PerScreen<string> wandLocation = new();
-		internal static readonly PerScreen<Point> wandTile = new();
 		internal static readonly PerScreen<bool> fromWand = new();
 
 		internal static void Init()
@@ -28,8 +26,7 @@ namespace WarpNetwork.framework
 		}
 		private static void Cleanup(object sender, object ev)
 		{
-			wandTile.ResetAllScreens();
-			wandLocation.ResetAllScreens();
+			ReturnHandler.Instance.ClearReturnPoint();
 		}
 		private static bool WarpNetAction(GameLocation where, string[] split, Farmer who, Point tile)
 		{
@@ -68,10 +65,9 @@ namespace WarpNetwork.framework
 				}
 			}
 
-			if (exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase) && ModEntry.config.WandReturnEnabled && wandLocation.Value is not null)
+			if (!exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase) && ModEntry.config.WandReturnEnabled && ReturnHandler.Instance.HasReturnPoint)
 			{
-				if (Game1.getLocationFromName(wandLocation.Value) is not null)
-					dests.Add(ReturnHandler.Instance);
+				dests.Add(ReturnHandler.Instance);
 			}
 
 			foreach ((string id, var loc) in locs)

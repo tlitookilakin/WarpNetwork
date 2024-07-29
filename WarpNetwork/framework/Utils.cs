@@ -19,15 +19,18 @@ namespace WarpNetwork.framework
 
 		public static Point GetTargetTile(GameLocation where, Point target = default)
 		{
-			if (!DataLoader.Locations(Game1.content).TryGetValue(where.Name, out var data) || !data.DefaultArrivalTile.HasValue)
-				return default;
-
-			var tile = data.DefaultArrivalTile.Value;
-			if (target != default)
-				tile = target;
-
+			Point tile = target;
 			if (where is Farm)
+			{
 				tile = GetFarmTile(where);
+			}
+			else if (target != default)
+			{
+				if (!DataLoader.Locations(Game1.content).TryGetValue(where.Name, out var data) || !data.DefaultArrivalTile.HasValue)
+					return default;
+
+				tile = data.DefaultArrivalTile.Value;
+			}
 
 			if (where.TryGetMapPropertyAs("WarpNetworkEntry", out Point prop, false))
 				tile = prop;

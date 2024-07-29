@@ -15,6 +15,20 @@ namespace WarpNetwork.models
         private readonly PerScreen<Point> targetTile = new();
         private readonly PerScreen<string> targetLocation = new();
 
+        public bool HasReturnPoint => this.targetLocation.Value is not null && Game1.getLocationFromName(this.targetLocation.Value) is not null;
+
+        public void ClearReturnPoint()
+        {
+            this.targetTile.ResetAllScreens();
+            this.targetLocation.ResetAllScreens();
+        }
+
+        public void SetReturnLocation()
+        {
+            this.targetLocation.Value = Game1.currentLocation.NameOrUniqueName;
+            this.targetTile.Value = Game1.player.TilePoint;
+        }
+
         public string Label
             => ModEntry.i18n.Get("dest.return");
 
@@ -41,8 +55,7 @@ namespace WarpNetwork.models
             return
                 Game1.CurrentEvent is null &&
                 targetLocation.Value is not null &&
-                ModEntry.config.WandReturnEnabled &&
-                WarpHandler.fromWand.Value;
+                ModEntry.config.WandReturnEnabled;
         }
 
         public void AfterWarp(string name, Point tile, IWarpNetAPI.IDestinationHandler handler)
