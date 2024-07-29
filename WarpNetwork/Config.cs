@@ -36,10 +36,12 @@ namespace WarpNetwork
 		{
 			//helper.GameContent.InvalidateCache(pathLocData)
 
-			if (!ModEntry.helper.ModRegistry.IsLoaded("spacechase0.GenericModConfigMenu"))
+			var gmcm = ModEntry.helper.ModRegistry.GetApi<IGMCMAPI>("spacechase0.GenericModConfigMenu");
+			if (gmcm is null)
+			{
 				return;
+			}
 
-			var gmcm = ModEntry.helper.ModRegistry.GetApi<IGMCMAPI>(manifest.UniqueID);
 			gmcm.Register(manifest, Reset, Save);
 
 			gmcm.AddQuickEnum<WarpEnabled>(this, manifest, nameof(OverrideEnabled));

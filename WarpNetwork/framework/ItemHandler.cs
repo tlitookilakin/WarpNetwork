@@ -15,14 +15,15 @@ namespace WarpNetwork.framework
 		private static readonly PerScreen<WarpItem> currentTotem = new();
 		private static readonly PerScreen<Item> currentItem = new();
 
-		internal static bool TryUseTotem(Farmer who, Item what)
+		internal static bool TryUseWand(Farmer who)
 		{
-			if (what is Wand && who == Game1.player && ModEntry.config.AccessFromWand)
+			if (ModEntry.config.AccessFromWand)
 			{
-				WarpHandler.ShowWarpMenu(who.currentLocation, who, "_wand");
+				WarpHandler.ShowWarpMenu(who.currentLocation, who, "");
 				return true;
 			}
-			return UseItem(who, what);
+
+			return false;
 		}
 		internal static bool ActivateObject(SObject obj, bool checking, Farmer who)
 		{

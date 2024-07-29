@@ -57,13 +57,14 @@ namespace WarpNetwork.framework
 
 		public static Dictionary<string, IWarpNetAPI.IDestinationHandler> GetWarpLocations()
 		{
-			Dictionary<string, IWarpNetAPI.IDestinationHandler> ret = new(
-				ModEntry.helper.GameContent.Load<Dictionary<string, IWarpNetAPI.IDestinationHandler>>(ModEntry.AssetPath + "/Destinations"),
-				StringComparer.OrdinalIgnoreCase
-			);
+			Dictionary<string, IWarpNetAPI.IDestinationHandler> ret = new Dictionary<string, IWarpNetAPI.IDestinationHandler>(StringComparer.OrdinalIgnoreCase);
+			foreach ((var key, var value) in ModEntry.helper.GameContent.Load<Dictionary<string, WarpLocation>>(ModEntry.AssetPath + "/Destinations"))
+			{
+				ret[key] = value;
+			}
 
-			foreach ((var key, var val) in CustomLocs)
-				ret[key] = val;
+			foreach ((var key, var value) in CustomLocs)
+				ret[key] = value;
 
 			return ret;
 		}
@@ -188,11 +189,11 @@ namespace WarpNetwork.framework
 		internal static void AddQuickBool(this IGMCMAPI api, object inst, IManifest manifest, string prop)
 		{
 			var p = inst.GetType().GetProperty(prop);
-			var cfname = prop.Decap();
+			var cfname = prop;
 			api.AddBoolOption(manifest,
 				p.GetGetMethod().CreateDelegate<Func<bool>>(inst),
 				p.GetSetMethod().CreateDelegate<Action<bool>>(inst),
-				() => ModEntry.i18n.Get($"config.{cfname}.name"),
+				() => ModEntry.i18n.Get($"config.{cfname}.label"),
 				() => ModEntry.i18n.Get($"config.{cfname}.desc")
 			);
 		}
@@ -200,20 +201,24 @@ namespace WarpNetwork.framework
 		internal static void AddQuickEnum<TE>(this IGMCMAPI api, object inst, IManifest manifest, string prop) where TE : Enum
 		{
 			var p = inst.GetType().GetProperty(prop);
-			var cfname = prop.Decap();
+
+			// It looks to me like at some point in the past (like prior to the update to 1.6), somebody did a
+			//  code-cleanup and renamed the property from 'WarpsEnabled' to 'OverrideEnabled' not realizing that
+			//  the property name was also tied in to the localization labels.  This is the least-churn way of
+			//  making it work.  I'm not so sure that "Fixing it properly" would entail the wider change, as
+			//  to my mind "properly" would be a change to prevent this sort of thing from recurring.
+			var cfname = prop == "OverrideEnabled" ? "WarpsEnabled" : prop;
+
 			var tenum = typeof(TE);
-			var tname = tenum.Name.Decap();
+			var tname = tenum.Name;
 			api.AddTextOption(manifest,
 				() => p.GetValue(inst).ToString(),
 				(s) => p.SetValue(inst, (TE)Enum.Parse(tenum, s)),
-				() => ModEntry.i18n.Get($"config.{cfname}.name"),
+				() => ModEntry.i18n.Get($"config.{cfname}.label"),
 				() => ModEntry.i18n.Get($"config.{cfname}.desc"),
 				Enum.GetNames(tenum),
 				(s) => ModEntry.i18n.Get($"config.{tname}.{s}")
 			);
 		}
-
-		internal static string Decap(this string src)
-			=> src.Length > 0 ? char.ToLower(src[0]) + src[1..] : string.Empty;
 	}
 }

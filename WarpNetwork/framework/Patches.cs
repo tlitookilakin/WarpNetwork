@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using StardewValley.Buildings;
 using WarpNetwork.models;
+using StardewValley.Tools;
 
 namespace WarpNetwork.framework
 {
@@ -22,9 +23,12 @@ namespace WarpNetwork.framework
 
 		internal static void Patch(Harmony harmony)
 		{
+			// FIX: Override Wand.DoFunction instead.
 			harmony.Patch(
-				typeof(SObject).GetMethod(nameof(SObject.performUseAction)), 
-				new(typeof(Patches), nameof(UsePrefix)));
+				typeof(Wand).GetMethod(nameof(Wand.DoFunction)), 
+				new(typeof(Patches), nameof(WandDoFunctionPrefix)));
+
+
 			harmony.Patch(
 				typeof(SObject).GetMethod(nameof(SObject.checkForAction)), 
 				new(typeof(Patches), nameof(ActionPrefix)));
@@ -34,20 +38,19 @@ namespace WarpNetwork.framework
 			);
 		}
 
-		private static bool UsePrefix(GameLocation location, SObject __instance, ref bool __result)
+		private static bool WandDoFunctionPrefix(GameLocation location, SObject __instance)
 		{
-			if (!Game1.player.canMove || __instance.isTemporarilyInvisible)
+			if (__instance.isTemporarilyInvisible)
 				return true;
 
-			if (!Game1.eventUp && !Game1.isFestival() &&
-				!Game1.fadeToBlack && !Game1.player.swimming.Value &&
-				!Game1.player.bathingClothes.Value && !Game1.player.onBridge.Value)
+			if (Game1.eventUp || Game1.isFestival() &&
+				Game1.fadeToBlack || Game1.player.swimming.Value &&
+				Game1.player.bathingClothes.Value || Game1.player.onBridge.Value)
 				return true;
 
-			if (!ItemHandler.TryUseTotem(Game1.player, __instance))
+			if (!ItemHandler.TryUseWand(Game1.player))
 				return true;
 
-			__result = false;
 			return false;
 		}
 
