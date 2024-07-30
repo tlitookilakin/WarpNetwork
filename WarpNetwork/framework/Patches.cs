@@ -23,12 +23,9 @@ namespace WarpNetwork.framework
 
 		internal static void Patch(Harmony harmony)
 		{
-			// FIX: Override Wand.DoFunction instead.
 			harmony.Patch(
 				typeof(Wand).GetMethod(nameof(Wand.DoFunction)), 
 				new(typeof(Patches), nameof(WandDoFunctionPrefix)));
-
-
 			harmony.Patch(
 				typeof(SObject).GetMethod(nameof(SObject.checkForAction)), 
 				new(typeof(Patches), nameof(ActionPrefix)));

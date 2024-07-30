@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Tools;
 using WarpNetwork.api;
 using WarpNetwork.framework;
 using xTile.Dimensions;
@@ -42,16 +43,14 @@ namespace WarpNetwork.models
 		public bool IsVisible(GameLocation context, Farmer who)
 			=> DisplayCondition is null || GameStateQuery.CheckConditions(DisplayCondition, context, who);
 
-		public Point GetLandingPoint(Farmer who = null, bool fromWand = false)
+		public Point GetLandingPoint(Farmer who = null)
 		{
-			if (Location.Equals("Farm", System.StringComparison.OrdinalIgnoreCase))
-				if (fromWand && who is not null)
-					return Utility.getHomeOfFarmer(who).getFrontDoorSpot();
-
-			return 
-				!OverrideMapProperty || Position == default ?
-				Utils.GetTargetTile(Game1.getLocationFromName(Location), Position) : 
-				Position;
+			if (Location.Equals("Farm", System.StringComparison.OrdinalIgnoreCase) && who?.ActiveItem is Wand)
+				return Utility.getHomeOfFarmer(who).getFrontDoorSpot();
+			else if (!OverrideMapProperty || Position == default)
+				return Utils.GetTargetTile(Game1.getLocationFromName(Location), Position);
+			else
+				return Position;
 		}
 
 		public bool Activate(GameLocation location, Farmer who)
@@ -72,7 +71,7 @@ namespace WarpNetwork.models
 			if (!IsAccessible(where, who))
 				return false;
 
-			var tile = GetLandingPoint(who, WarpHandler.fromWand.Value);
+			var tile = GetLandingPoint(who);
 
 			if (tile == default)
 			{

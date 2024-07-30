@@ -14,8 +14,6 @@ namespace WarpNetwork.framework
 {
 	class WarpHandler
 	{
-		internal static readonly PerScreen<bool> fromWand = new();
-
 		internal static void Init()
 		{
 			GameLocation.RegisterTileAction("warpnetwork", WarpNetAction);
@@ -42,8 +40,6 @@ namespace WarpNetwork.framework
 		}
 		public static void ShowWarpMenu(GameLocation where, Farmer who, string exclude = "", bool consume = false)
 		{
-			fromWand.Value = false;
-
 			ModEntry.monitor.Log($"Activating menu; exclude: {exclude}, consume: {consume}");
 			if (!ModEntry.config.MenuEnabled)
 			{
@@ -100,7 +96,6 @@ namespace WarpNetwork.framework
 				return;
 			}
 
-			fromWand.Value = exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase);
 			Game1.activeClickableMenu = new WarpMenu(dests);
 		}
 		internal static void ShowFailureText()
@@ -121,8 +116,6 @@ namespace WarpNetwork.framework
 
 		public static bool DirectWarp(string location, bool force, GameLocation where, Farmer who)
 		{
-			fromWand.Value = false;
-
 			if (location is not null)
 				if (Utils.GetWarpLocations().TryGetValue(location, out var loc) &&
 					(force || loc.IsAccessible(where, who)) &&

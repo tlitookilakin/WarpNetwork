@@ -24,7 +24,7 @@ namespace WarpNetwork.framework
 			{
 				tile = GetFarmTile(where);
 			}
-			else if (target != default)
+			else if (target == default)
 			{
 				if (!DataLoader.Locations(Game1.content).TryGetValue(where.Name, out var data) || !data.DefaultArrivalTile.HasValue)
 					return default;

@@ -60,7 +60,7 @@ namespace WarpNetwork.models
 
         public void AfterWarp(string name, Point tile, IWarpNetAPI.IDestinationHandler handler)
         {
-            if (handler == this || name is "Temp" || !WarpHandler.fromWand.Value)
+            if (handler == this || name is "Temp")
                 return;
 
             targetTile.Value = tile;
