@@ -8,12 +8,18 @@ using System.Globalization;
 using System.IO;
 using WarpNetwork.api;
 using WarpNetwork.models;
+using xTile;
 using DColor = System.Drawing.Color;
 
 namespace WarpNetwork.framework
 {
 	static class Utils
 	{
+        private static readonly string[] VanillaMapNames =
+        {
+            "Farm","Farm_Fishing","Farm_Foraging","Farm_Mining","Farm_Combat","Farm_FourCorners","Farm_Island"
+        };
+        
 		public static Dictionary<string, IWarpNetAPI.IDestinationHandler> CustomLocs =
 			new(StringComparer.OrdinalIgnoreCase) { {"_return", ReturnHandler.Instance } };
 
@@ -223,5 +229,74 @@ namespace WarpNetwork.framework
 				(s) => ModEntry.i18n.Get($"config.{tname}.{s}")
 			);
 		}
-	}
+
+        public static string GetFarmMapPath()
+        {
+            if (Game1.whichFarm < 0)
+            {
+                ModEntry.monitor.Log("Something is wrong! Game1.whichfarm does not contain a valid value!", LogLevel.Warn);
+                return "";
+            }
+
+            if (Game1.whichFarm < 7)
+                return VanillaMapNames[Game1.whichFarm];
+
+            if (Game1.whichModFarm is null)
+            {
+                ModEntry.monitor.Log("Something is wrong! Custom farm indicated, but Game1.whichModFarm is null!", LogLevel.Warn);
+                return "";
+            }
+
+            return Game1.whichModFarm.MapName;
+        }
+
+        public static void TryGetActualFarmPoint(ref Point Position, Map map = null, string filename = null)
+        {
+            map ??= Game1.getFarm().Map;
+
+            switch (GetFarmType(filename))
+            {
+                //four corners
+                case 5:
+                    Position = new(48, 39);
+                    break;
+
+                //beach
+                case 6:
+                    Position = new(82, 29);
+                    break;
+            }
+            TryGetMapPropertyPosition(map, "WarpTotemEntry", ref Position);
+        }
+        private static readonly Dictionary<string, int> FarmTypeMap = new()
+        {
+            { "farm", 0 },
+            { "farm_fishing", 1 },
+            { "farm_foraging", 2 },
+            { "farm_mining", 3 },
+            { "farm_combat", 4 },
+            { "farm_fourcorners", 5 },
+            { "farm_island", 6 }
+        };
+        public static int GetFarmType(string filename)
+		    => filename is null ? Game1.whichFarm : FarmTypeMap.TryGetValue(filename, out var type) ? type : 0;
+        public static bool TryGetMapPropertyPosition(Map map, string property, ref Point position)
+        {
+            if (!map.Properties.TryGetValue(property, out var v))
+                return false;
+
+            string prop = (string)v;
+
+            string[] args = prop.Split(' ');
+            if (args.Length < 2)
+                return false;
+
+            if (int.TryParse(args[0], out int x) && int.TryParse(args[1], out int y))
+                position = new(x, y);
+            else
+                return false;
+
+            return true;
+        }
+    }
 }
