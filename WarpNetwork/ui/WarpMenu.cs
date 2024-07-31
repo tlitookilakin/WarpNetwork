@@ -6,7 +6,6 @@ using StardewValley.Menus;
 using System;
 using System.Collections.Generic;
 using WarpNetwork.api;
-using WarpNetwork.framework;
 using WarpNetwork.models;
 
 namespace WarpNetwork.ui
@@ -137,7 +136,6 @@ namespace WarpNetwork.ui
 						if (button.location != null)
 						{
 							ModEntry.monitor.Log("Destination selected! Closing menu and warping...");
-							// TODO: If this is the 'return' function, do ClearReturnLocation instead
 							button.location.Activate(who.currentLocation, who);
 							exitThisMenuNoSound();
 						}
