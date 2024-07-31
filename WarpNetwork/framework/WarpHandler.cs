@@ -28,14 +28,14 @@ namespace WarpNetwork.framework
 		}
 		private static bool WarpNetAction(GameLocation where, string[] split, Farmer who, Point tile)
 		{
-			var id = split.Length is 0 ? string.Empty : split[0];
-			ShowWarpMenu(where, who, id);
+			var locationOfTotem = split.Length < 2 ? string.Empty : split[1];
+			ShowWarpMenu(where, who, locationOfTotem);
 			return true;
 		}
 		private static bool WarpToAction(GameLocation where, string[] split, Farmer who, Point tile)
 		{
-			var id = split.Length is 0 ? string.Empty : split[0];
-			DirectWarp(id, where, who);
+            var id = split.Length < 2 ? string.Empty : split[1];
+            DirectWarp(id, where, who);
 			return true;
 		}
 		public static void ShowWarpMenu(GameLocation where, Farmer who, string exclude = "", bool consume = false)
@@ -61,7 +61,7 @@ namespace WarpNetwork.framework
 				}
 			}
 
-			if (!exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase) && ModEntry.config.WandReturnEnabled && ReturnHandler.Instance.HasReturnPoint)
+			if (exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase) && ModEntry.config.WandReturnEnabled && ReturnHandler.Instance.HasReturnPoint)
 			{
 				dests.Add(ReturnHandler.Instance);
 			}

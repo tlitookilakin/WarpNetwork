@@ -138,7 +138,7 @@ namespace WarpNetwork.framework
                         if (tile is null)
                             ModEntry.monitor.Log($"No tile in building layer, could not add access point: '{id}' @ {spot.X}, {spot.Y}", LogLevel.Warn);
                         else
-                            tile.Properties["Action"] = "WarpNetwork " + id;
+                            tile.Properties["Action"] = "warpnetwork " + id;
                     }
                     else
                     {

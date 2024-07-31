@@ -19,7 +19,7 @@ namespace WarpNetwork.framework
 		{
 			if (ModEntry.config.AccessFromWand)
 			{
-				WarpHandler.ShowWarpMenu(who.currentLocation, who, "");
+				WarpHandler.ShowWarpMenu(who.currentLocation, who, "_wand");
 				return true;
 			}
 

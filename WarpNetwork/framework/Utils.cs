@@ -21,7 +21,7 @@ namespace WarpNetwork.framework
         };
         
 		public static Dictionary<string, IWarpNetAPI.IDestinationHandler> CustomLocs =
-			new(StringComparer.OrdinalIgnoreCase) { {"_return", ReturnHandler.Instance } };
+			new(StringComparer.OrdinalIgnoreCase);
 
 		public static Point GetTargetTile(GameLocation where, Point target = default)
 		{
