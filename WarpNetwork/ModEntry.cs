@@ -42,6 +42,7 @@ namespace WarpNetwork
 				"Master command for Warp Network mod. Use 'warpnet' or 'warpnet help' to see a list of subcommands.",
 				CommandHandler.Main);
 			DataPatcher.Init();
+			WarpHandler.Init();
 			Queries.Register();
 			CPIntegration.AddTokens(ModManifest);
 		}

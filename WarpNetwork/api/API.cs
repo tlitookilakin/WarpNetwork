@@ -53,7 +53,7 @@ namespace WarpNetwork.api
 					false,
 					Game1.random.NextDouble() < 0.5)
 				);
-			where.playSound("wand", who.Position);
+			Game1.playSound("wand");
 			Game1.displayFarmer = false;
 			who.temporarilyInvincible = true;
 			who.temporaryInvincibilityTimer = -2000;
@@ -81,7 +81,6 @@ namespace WarpNetwork.api
 				Game1.player.temporarilyInvincible = false;
 				Game1.player.temporaryInvincibilityTimer = 0;
 				Game1.displayFarmer = true;
-				WarpHandler.fromWand.Value = false;
 			}), 1000);
 		}
 	}

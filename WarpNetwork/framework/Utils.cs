@@ -8,26 +8,35 @@ using System.Globalization;
 using System.IO;
 using WarpNetwork.api;
 using WarpNetwork.models;
+using xTile;
 using DColor = System.Drawing.Color;
 
 namespace WarpNetwork.framework
 {
 	static class Utils
 	{
+        private static readonly string[] VanillaMapNames =
+        {
+            "Farm","Farm_Fishing","Farm_Foraging","Farm_Mining","Farm_Combat","Farm_FourCorners","Farm_Island"
+        };
+        
 		public static Dictionary<string, IWarpNetAPI.IDestinationHandler> CustomLocs =
-			new(StringComparer.OrdinalIgnoreCase) { {"_return", ReturnHandler.Instance } };
+			new(StringComparer.OrdinalIgnoreCase);
 
 		public static Point GetTargetTile(GameLocation where, Point target = default)
 		{
-			if (!DataLoader.Locations(Game1.content).TryGetValue(where.Name, out var data) || !data.DefaultArrivalTile.HasValue)
-				return default;
-
-			var tile = data.DefaultArrivalTile.Value;
-			if (target != default)
-				tile = target;
-
+			Point tile = target;
 			if (where is Farm)
+			{
 				tile = GetFarmTile(where);
+			}
+			else if (target == default)
+			{
+				if (!DataLoader.Locations(Game1.content).TryGetValue(where.Name, out var data) || !data.DefaultArrivalTile.HasValue)
+					return default;
+
+				tile = data.DefaultArrivalTile.Value;
+			}
 
 			if (where.TryGetMapPropertyAs("WarpNetworkEntry", out Point prop, false))
 				tile = prop;
@@ -57,13 +66,14 @@ namespace WarpNetwork.framework
 
 		public static Dictionary<string, IWarpNetAPI.IDestinationHandler> GetWarpLocations()
 		{
-			Dictionary<string, IWarpNetAPI.IDestinationHandler> ret = new(
-				ModEntry.helper.GameContent.Load<Dictionary<string, IWarpNetAPI.IDestinationHandler>>(ModEntry.AssetPath + "/Destinations"),
-				StringComparer.OrdinalIgnoreCase
-			);
+			Dictionary<string, IWarpNetAPI.IDestinationHandler> ret = new Dictionary<string, IWarpNetAPI.IDestinationHandler>(StringComparer.OrdinalIgnoreCase);
+			foreach ((var key, var value) in ModEntry.helper.GameContent.Load<Dictionary<string, WarpLocation>>(ModEntry.AssetPath + "/Destinations"))
+			{
+				ret[key] = value;
+			}
 
-			foreach ((var key, var val) in CustomLocs)
-				ret[key] = val;
+			foreach ((var key, var value) in CustomLocs)
+				ret[key] = value;
 
 			return ret;
 		}
@@ -188,11 +198,11 @@ namespace WarpNetwork.framework
 		internal static void AddQuickBool(this IGMCMAPI api, object inst, IManifest manifest, string prop)
 		{
 			var p = inst.GetType().GetProperty(prop);
-			var cfname = prop.Decap();
+			var cfname = prop;
 			api.AddBoolOption(manifest,
 				p.GetGetMethod().CreateDelegate<Func<bool>>(inst),
 				p.GetSetMethod().CreateDelegate<Action<bool>>(inst),
-				() => ModEntry.i18n.Get($"config.{cfname}.name"),
+				() => ModEntry.i18n.Get($"config.{cfname}.label"),
 				() => ModEntry.i18n.Get($"config.{cfname}.desc")
 			);
 		}
@@ -200,20 +210,93 @@ namespace WarpNetwork.framework
 		internal static void AddQuickEnum<TE>(this IGMCMAPI api, object inst, IManifest manifest, string prop) where TE : Enum
 		{
 			var p = inst.GetType().GetProperty(prop);
-			var cfname = prop.Decap();
+
+			// It looks to me like at some point in the past (like prior to the update to 1.6), somebody did a
+			//  code-cleanup and renamed the property from 'WarpsEnabled' to 'OverrideEnabled' not realizing that
+			//  the property name was also tied in to the localization labels.  This is the least-churn way of
+			//  making it work.  I'm not so sure that "Fixing it properly" would entail the wider change, as
+			//  to my mind "properly" would be a change to prevent this sort of thing from recurring.
+			var cfname = prop == "OverrideEnabled" ? "WarpsEnabled" : prop;
+
 			var tenum = typeof(TE);
-			var tname = tenum.Name.Decap();
+			var tname = tenum.Name;
 			api.AddTextOption(manifest,
 				() => p.GetValue(inst).ToString(),
 				(s) => p.SetValue(inst, (TE)Enum.Parse(tenum, s)),
-				() => ModEntry.i18n.Get($"config.{cfname}.name"),
+				() => ModEntry.i18n.Get($"config.{cfname}.label"),
 				() => ModEntry.i18n.Get($"config.{cfname}.desc"),
 				Enum.GetNames(tenum),
 				(s) => ModEntry.i18n.Get($"config.{tname}.{s}")
 			);
 		}
 
-		internal static string Decap(this string src)
-			=> src.Length > 0 ? char.ToLower(src[0]) + src[1..] : string.Empty;
-	}
+        public static string GetFarmMapPath()
+        {
+            if (Game1.whichFarm < 0)
+            {
+                ModEntry.monitor.Log("Something is wrong! Game1.whichfarm does not contain a valid value!", LogLevel.Warn);
+                return "";
+            }
+
+            if (Game1.whichFarm < 7)
+                return VanillaMapNames[Game1.whichFarm];
+
+            if (Game1.whichModFarm is null)
+            {
+                ModEntry.monitor.Log("Something is wrong! Custom farm indicated, but Game1.whichModFarm is null!", LogLevel.Warn);
+                return "";
+            }
+
+            return Game1.whichModFarm.MapName;
+        }
+
+        public static void TryGetActualFarmPoint(ref Point Position, Map map = null, string filename = null)
+        {
+            map ??= Game1.getFarm().Map;
+
+            switch (GetFarmType(filename))
+            {
+                //four corners
+                case 5:
+                    Position = new(48, 39);
+                    break;
+
+                //beach
+                case 6:
+                    Position = new(82, 29);
+                    break;
+            }
+            TryGetMapPropertyPosition(map, "WarpTotemEntry", ref Position);
+        }
+        private static readonly Dictionary<string, int> FarmTypeMap = new()
+        {
+            { "farm", 0 },
+            { "farm_fishing", 1 },
+            { "farm_foraging", 2 },
+            { "farm_mining", 3 },
+            { "farm_combat", 4 },
+            { "farm_fourcorners", 5 },
+            { "farm_island", 6 }
+        };
+        public static int GetFarmType(string filename)
+		    => filename is null ? Game1.whichFarm : FarmTypeMap.TryGetValue(filename, out var type) ? type : 0;
+        public static bool TryGetMapPropertyPosition(Map map, string property, ref Point position)
+        {
+            if (!map.Properties.TryGetValue(property, out var v))
+                return false;
+
+            string prop = (string)v;
+
+            string[] args = prop.Split(' ');
+            if (args.Length < 2)
+                return false;
+
+            if (int.TryParse(args[0], out int x) && int.TryParse(args[1], out int y))
+                position = new(x, y);
+            else
+                return false;
+
+            return true;
+        }
+    }
 }

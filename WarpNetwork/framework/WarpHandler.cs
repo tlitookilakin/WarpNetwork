@@ -14,10 +14,6 @@ namespace WarpNetwork.framework
 {
 	class WarpHandler
 	{
-		internal static readonly PerScreen<string> wandLocation = new();
-		internal static readonly PerScreen<Point> wandTile = new();
-		internal static readonly PerScreen<bool> fromWand = new();
-
 		internal static void Init()
 		{
 			GameLocation.RegisterTileAction("warpnetwork", WarpNetAction);
@@ -28,25 +24,22 @@ namespace WarpNetwork.framework
 		}
 		private static void Cleanup(object sender, object ev)
 		{
-			wandTile.ResetAllScreens();
-			wandLocation.ResetAllScreens();
+			ReturnHandler.Instance.ClearReturnPoint();
 		}
 		private static bool WarpNetAction(GameLocation where, string[] split, Farmer who, Point tile)
 		{
-			var id = split.Length is 0 ? string.Empty : split[0];
-			ShowWarpMenu(where, who, id);
+			var locationOfTotem = split.Length < 2 ? string.Empty : split[1];
+			ShowWarpMenu(where, who, locationOfTotem);
 			return true;
 		}
 		private static bool WarpToAction(GameLocation where, string[] split, Farmer who, Point tile)
 		{
-			var id = split.Length is 0 ? string.Empty : split[0];
-			DirectWarp(id, where, who);
+            var id = split.Length < 2 ? string.Empty : split[1];
+            DirectWarp(id, where, who);
 			return true;
 		}
 		public static void ShowWarpMenu(GameLocation where, Farmer who, string exclude = "", bool consume = false)
 		{
-			fromWand.Value = false;
-
 			ModEntry.monitor.Log($"Activating menu; exclude: {exclude}, consume: {consume}");
 			if (!ModEntry.config.MenuEnabled)
 			{
@@ -68,10 +61,9 @@ namespace WarpNetwork.framework
 				}
 			}
 
-			if (exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase) && ModEntry.config.WandReturnEnabled && wandLocation.Value is not null)
+			if (exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase) && ModEntry.config.WandReturnEnabled && ReturnHandler.Instance.HasReturnPoint)
 			{
-				if (Game1.getLocationFromName(wandLocation.Value) is not null)
-					dests.Add(ReturnHandler.Instance);
+				dests.Add(ReturnHandler.Instance);
 			}
 
 			foreach ((string id, var loc) in locs)
@@ -104,7 +96,6 @@ namespace WarpNetwork.framework
 				return;
 			}
 
-			fromWand.Value = exclude.Equals("_wand", StringComparison.OrdinalIgnoreCase);
 			Game1.activeClickableMenu = new WarpMenu(dests);
 		}
 		internal static void ShowFailureText()
@@ -125,8 +116,6 @@ namespace WarpNetwork.framework
 
 		public static bool DirectWarp(string location, bool force, GameLocation where, Farmer who)
 		{
-			fromWand.Value = false;
-
 			if (location is not null)
 				if (Utils.GetWarpLocations().TryGetValue(location, out var loc) &&
 					(force || loc.IsAccessible(where, who)) &&

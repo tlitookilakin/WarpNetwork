@@ -40,13 +40,19 @@ namespace WarpNetwork.ui
 				exitThisMenuNoSound();
 			}
 
-			autoAlign = x == 0 && y == 0;
+            title = ModEntry.helper.Translation.Get("ui-label");
+            var titleSize = Game1.dialogueFont.MeasureString(title);
+
+			// Try and make the dialog so that it fits as neatly as it can.  The "+1" after locs.Count accounts for the title.
+			// The *1.5 is a spitball estimate that accounts for the padding and margins.
+			var estimatedHeight = Math.Max(Math.Min(locs.Count+1, 9), 4) * titleSize.Y * 1.5;
+
+            autoAlign = x == 0 && y == 0;
 			this.width = width != 0 ? width : 600;
-			this.height = height != 0 ? height : 380;
+			this.height = height != 0 ? height : (int)estimatedHeight;
 			this.locs = locs;
 			who = Game1.player;
-			title = ModEntry.helper.Translation.Get("ui-label");
-			titleW = (int)Game1.dialogueFont.MeasureString(title).X + 33 + 36;
+			titleW = (int)titleSize.X + 33 + 36;
 			upArrow = new(new Rectangle(0, 0, 33, 36), Game1.mouseCursors, new Rectangle(421, 459, 11, 12), 3f);
 			downArrow = new(new Rectangle(0, 0, 33, 36), Game1.mouseCursors, new Rectangle(421, 472, 11, 12), 3f);
 			defaultIcon = ModEntry.helper.GameContent.Load<Texture2D>(ModEntry.AssetPath + "/Icons/DEFAULT");
